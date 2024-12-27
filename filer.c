@@ -32,7 +32,7 @@ int getExtId(const char *szFilePath) {
 		pszExt++;
 		int i;
 		for (i = 0; stExtentions[i].nExtId != EXT_UNKNOWN; i++) {
-			if (!stricmp(stExtentions[i].szExt,pszExt)) {
+			if (!strcasecmp(stExtentions[i].szExt,pszExt)) {
 				return stExtentions[i].nExtId;
 			}
 		}
@@ -396,7 +396,7 @@ int getFilePath(char *fullpath, u32 ext)
 
 	if (tmp[0]){
 		for(i=0; i<nfiles; i++){
-			if (!stricmp(sortfiles[i]->d_name,tmp)){
+			if (!strcasecmp(sortfiles[i]->d_name,tmp)){
 				sel = i;
 				top = i-3;
 				break;

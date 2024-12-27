@@ -221,7 +221,7 @@ byte cpu_read_direct_ord(word adr)
 
 //’Z‚­‚µ‚ÄƒCƒ“ƒ‰ƒCƒ“‚É‚Ô‚¿‚±‚Ş - LCK
 //inline byte cpu_read_direct(word adr)
-inline byte cpu_read(word adr)
+static inline byte cpu_read(word adr)
 {
 	if ((adr&0x8000)==0) {
 		return ((adr&0x4000)==0)?get_rom()[adr]:mbc_get_rom()[adr];

@@ -929,7 +929,7 @@ void rin_findState(int nState[], int nThumb[])
 		get_state_path(i,tmp);
 		nState[i]=-1;
 		for(j=0; j<nfiles; j++){
-			if(!stricmp(p,files[j].d_name)){
+			if(!strcasecmp(p,files[j].d_name)){
 				nState[i] = j;
 				break;
 			}
@@ -938,7 +938,7 @@ void rin_findState(int nState[], int nThumb[])
 		if (nState[i]<0){
 			strcat(p, ".gz");
 			for(j=0; j<nfiles; j++){
-				if(!stricmp(p,files[j].d_name)){
+				if(!strcasecmp(p,files[j].d_name)){
 					nState[i] = j;
 					break;
 				}
@@ -948,7 +948,7 @@ void rin_findState(int nState[], int nThumb[])
 		get_thumb_path(i,tmp);
 		nThumb[i]=-1;
 		for(j=0; j<nfiles; j++){
-			if(!stricmp(p,files[j].d_name)){
+			if(!strcasecmp(p,files[j].d_name)){
 				nThumb[i] = j;
 				break;
 			}
@@ -958,7 +958,7 @@ void rin_findState(int nState[], int nThumb[])
 
 		*strrchr(tmp, '.') = 0;
 		for(j=0; j<nfiles; j++){
-			if(!stricmp(p,files[j].d_name)){
+			if(!strcasecmp(p,files[j].d_name)){
 				nThumb[i] = j;
 				break;
 			}
@@ -1027,7 +1027,7 @@ int rin_stateslot(int type)
 			}
 			else if (nState[sel]>=0 && nThumb[sel]>=0){
 				p = strrchr(files[nThumb[sel]].d_name, '.');
-				if(!stricmp(p, ".png"))
+				if(!strcasecmp(p, ".png"))
 					ret = load_thumb(sel,thumb_w,sizeof(thumb_w));
 				else
 					ret = load_thumb_old(sel,thumb_w,sizeof(thumb_w));
@@ -1079,12 +1079,12 @@ int rin_stateslot(int type)
 				sprintf(msg,"%d - None", i);
 			}else{
 				sprintf(msg, "%d - %04d/%02d/%02d %02d:%02d:%02d", i,
-					files[nState[i]].d_stat.st_mtime.year,
-					files[nState[i]].d_stat.st_mtime.month,
-					files[nState[i]].d_stat.st_mtime.day,
-					files[nState[i]].d_stat.st_mtime.hour,
-					files[nState[i]].d_stat.st_mtime.minute,
-					files[nState[i]].d_stat.st_mtime.second);
+					files[nState[i]].d_stat.sce_st_mtime.year,
+					files[nState[i]].d_stat.sce_st_mtime.month,
+					files[nState[i]].d_stat.sce_st_mtime.day,
+					files[nState[i]].d_stat.sce_st_mtime.hour,
+					files[nState[i]].d_stat.sce_st_mtime.minute,
+					files[nState[i]].d_stat.sce_st_mtime.second);
 			}
 			pgPrint(x,y++,setting.color[i==sel?2:3],msg);
 		}

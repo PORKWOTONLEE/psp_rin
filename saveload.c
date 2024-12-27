@@ -21,7 +21,7 @@ int remove_file(const char *fullpath)
 	strcpy(name , p+1);
 	*p = 0;
 
-	if (stricmp(path, path_files)){
+	if (strcasecmp(path, path_files)){
 		nfiles = 0;
 		strcpy(path_files, path);
 		int fd = sceIoDopen(path);
@@ -37,7 +37,7 @@ int remove_file(const char *fullpath)
 
 	int i;
 	for (i=0; i<nfiles; i++){
-		if (!stricmp(name, files[i].name)){
+		if (!strcasecmp(name, files[i].name)){
 			sceIoRemove(fullpath);
 			return 1;
 		}

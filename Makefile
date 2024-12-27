@@ -11,7 +11,7 @@ OBJS = gbcore/cpu.o gbcore/gb.o gbcore/lcd.o gbcore/sgb.o \
 INCDIR		=
 
 ARCHFLAGS =-mgp32 -mlong32 -msingle-float -mabi=eabi
-CFLAGS = -Wall -fomit-frame-pointer $(ARCHFLAGS) -G3 -Wdouble-promotion
+CFLAGS = -Wall -fomit-frame-pointer $(ARCHFLAGS) -G3 -Wdouble-promotion -Wno-incompatible-pointer-types
 
 ifeq ($(MODE),REL)
 CFLAGS += -O3
@@ -24,7 +24,7 @@ ASFLAGS	= $(CFLAGS)
 
 LIBDIR	=
 LDFLAGS	= 
-LIBS = lib/unziplib.a lib/libpng.a -lz -lc -lm -lpspnet_inet -lpspuser -lpsppower -lpspaudio -lpsprtc
+LIBS = lib/unziplib.a lib/libpng.a -lz -lpsppower -lpspaudio 
 
 BUILD_PRX = 0
 

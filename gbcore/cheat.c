@@ -39,6 +39,25 @@ void cheat_init()
 	cheat_clear();
 }
 
+//短くしてインラインにぶちこむ - LCK
+extern void cpu_write_direct_ord(word adr,byte dat);
+inline void cpu_write_direct(word adr,byte dat)
+{
+	if ((adr&0xe000)==0xc000) {
+		if (adr&0x1000)
+			ram_bank[adr&0x0fff]=dat;
+		else
+			ram[adr&0x0fff]=dat;
+	} else if ((adr&0xe000)==0xa000) {
+		if (mbc_is_ext_ram())
+			mbc_get_sram()[adr&0x1FFF]=dat;//カートリッジRAM
+		else
+			mbc_ext_write(adr,dat);
+	} else {
+		cpu_write_direct_ord(adr,dat);
+	}
+}
+
 void cheat_decreate_cheat_map()
 {
 	int i;
@@ -71,6 +90,21 @@ void cheat_decreate_cheat_map()
 			break;
 		}
 	}
+}
+
+//短くしてインラインにぶちこむ - LCK
+//inline byte cpu_read_direct(word adr)
+extern byte cpu_read_direct_ord(word adr);
+inline byte cpu_read(word adr)
+{
+	if ((adr&0x8000)==0) {
+		return ((adr&0x4000)==0)?get_rom()[adr]:mbc_get_rom()[adr];
+	} else if ((adr&0xe000)==0xc000) {
+		return ((adr&0x1000)==0)?ram[adr&0xfff]:ram_bank[adr&0xfff];
+//	} else if ((adr&0xe000)==0xa000) {
+//		return (mbc_is_ext_ram())?mbc_get_sram()[adr&0x1FFF]:mbc_ext_read(adr);
+	}
+	return cpu_read_direct_ord(adr);
 }
 
 void cheat_create_cheat_map()
