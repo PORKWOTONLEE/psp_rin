@@ -7,7 +7,7 @@ int wavout_enable=0;
 short sound_buf[MAX_SOUND_BANKLEN*4*2];
 
 
-//44100,chan:2ŒÅ’è
+//44100,chan:2¹Ì¶¨
 static void wavout_snd0_callback(short *buf, unsigned long reqn)
 {
 	if (!wavout_enable) {

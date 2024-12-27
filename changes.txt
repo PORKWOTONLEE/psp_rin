@@ -1,104 +1,104 @@
-傛傝惓妋側曄峏揰
+より正確な変更点
 
 v1.32
-丒廔椆慜偺曐懚張棟偑傑偩廔傢偭偰偄側偄偺偵廔椆偝傟偰偟傑偄丄
-丂愝掕僼傽僀儖傗僙乕僽僼傽僀儖偑0byte偵側傞偲偄偆栤戣傪廋惓
-丒儘乕僶僢僥儕帪偵嫮惂僗儕乕僾
-丒曄峏偑側偐偭偨偲偒偼SRAM曐懚偟側偄乮SRAM偺CRC32傪斾妑乯
-丒儊僯儏乕拞偼忢帪僶僢僥儕乕儔僀僼昞帵
+?終了前の保存処理がまだ終わっていないのに終了されてしまい、
+　設定ファイルやセーブファイルが0byteになるという問題を修正
+?ローバッテリ時に強制スリープ
+?変更がなかったときはSRAM保存しない（SRAMのCRC32を比較）
+?メニュー中は常時バッテリーライフ表示
 
 v1.31
-丒mbc_write娭悢傪娭悢億僀儞僞偵曄峏丅僷僼僅乕儅儞僗偼摿偵夵慞偝傟偢丅
-丒zlib偺娭悢偱gz埑弅偡傞偲僼傽僀儖傾僋僙僗偑壗搙傕敪惗偟偰抶偔側傞偨傔丄
-丂帺慜偺娭悢偵彂偒姺偊丅
-丒儊儌儕忋傊偺僗僥乕僩僙乕僽偵懳墳
-丒僶僢僥儕巆検寈崘
-丒仩儃僞儞偱僋僀僢僋僗儘僢僩屻戅
+?mbc_write関数を関数ポインタに変更。パフォーマンスは特に改善されず。
+?zlibの関数でgz圧縮するとファイルアクセスが何度も発生して遅くなるため、
+　自前の関数に書き換え。
+?メモリ上へのステートセーブに対応
+?バッテリ残量警告
+?□ボタンでクイックスロット後退
 
 v1.3
-丒僠乕僩婡擻傪捛壛丅cpu_read娭悢傪僩儔僢僾偡傞偲僠乕僩晄巊梡帪偱傕
-丂懱姶嵎偑弌傞傎偳抶偔側偭偨偺偱丄cpu_write娭悢傪僩儔僢僾偡傞巇條偵偟偨丅
-丂偦偺偨傔偵TGB Dual奼挘偺斾妑宯偺僐乕僪偼幚憰偱偒偢丅
-丒apu傪彮偟岠棪壔丅僠乕僩婡擻偱廳偔側偭偨暘傪崌傢偣偰僩儞僩儞丅
-丒GPU昤夋偺扏偒戜傪uosnes9x傪嶲峫偵嶌惉
-丂乮偟偐偟GB偩偲儃働儃働偵側傞側偀乧乯
+?チート機能を追加。cpu_read関数をトラップするとチート不使用時でも
+　体感差が出るほど遅くなったので、cpu_write関数をトラップする仕様にした。
+　そのためにTGB Dual拡張の比較系のコードは実装できず。
+?apuを少し効率化。チート機能で重くなった分を合わせてトントン。
+?GPU描画の叩き台をuosnes9xを参考に作成
+　（しかしGBだとボケボケになるなぁ…）
 
 v1.29
-丒apu傪岠棪壔
-丒僒僂儞僪僶僢僼傽娭楢偺曄峏
-丒僗僥乕僩僙乕僽丒儘乕僪偱慜夞巊偭偨僗儘僢僩傪婰壇偡傞傛偆偵偟偨
-丒僗僥乕僩僼傽僀儖偺側偄僗儘僢僩偐傜偼儘乕僪晄壜偵偟偨
+?apuを効率化
+?サウンドバッファ関連の変更
+?ステートセーブ?ロードで前回使ったスロットを記憶するようにした
+?ステートファイルのないスロットからはロード不可にした
 
 v1.28
-丒fread偲fwrite傪儔僀僽儔儕傕娷傔偰慡偰晄巊梡偵偟偨丅
-丂偙偺曄峏偵敽偄libc偼昗弨偺傕偺偵栠偟偨丅
-丒慜夞奐偄偨僼僅儖僟偺婰壇偵幐攕偟偰偄偨僶僌傪廋惓
-丒GZIP偺ROM撉傒崬傒偵懳墳丅揥奐懍搙偼摉娐嫬偱偼ZIP偺5攞傎偳丅
-丒remove()傪巊偆慜偵僼傽僀儖偺懚嵼妋擣傪峴偆傛偆偵偟偨丅
-丒儊僯儏乕傪敳偗傞嵺偵僒僂儞僪僶僢僼傽傪僋儕傾
+?freadとfwriteをライブラリも含めて全て不使用にした。
+　この変更に伴いlibcは標準のものに戻した。
+?前回開いたフォルダの記憶に失敗していたバグを修正
+?GZIPのROM読み込みに対応。展開速度は当環境ではZIPの5倍ほど。
+?remove()を使う前にファイルの存在確認を行うようにした。
+?メニューを抜ける際にサウンドバッファをクリア
 
 v1.27
-丒僐儞僷僀儔傪撲暔懱偝傫偺偲偙傠偺gcc 4.0.0偵曄峏丅
-丒libc慻傒崬傒丅撲暔懱偝傫偺newlib傪巊梡丅
-丂偨偩偟偦偺傑傑偱偼fwrite偑寖抶偩偭偨偺偱丄
-丂stdio.h偺BUF_SIZ傪32KB偵憹傗偟偰僐儞僷僀儖偟捈偟偨丅
-丒zlib慻傒崬傒丅makefile偩偗楳偭偰偦偺傑傑僐儞僷僀儖丅
-丒ruka巵偺unziplib傪zlib岦偗偵嵞峔抸丅
-丒libpng慻傒崬傒丅makefile偩偗楳偭偰偦偺傑傑僐儞僷僀儖丅
-丒png偺暻巻偵懳墳
-丒僒儉僱僀儖偺僼僅乕儅僢僩傪PNG偵曄峏
-丒SRAM僼傽僀儖偲僗僥乕僩僼傽僀儖偺GZIP埑弅
-丒僗僥乕僩僙乕僽偺崅懍壔
-丒僗僥乕僩僗儘僢僩偺嵟戝抣傪9偵曄峏
-丒SGB偺昤夋傪崅懍壔乮僑僢僪儊僨傿僗儞偱妋擣乯
-丒VSYNC:OFF帪偺僂僃僀僩偑嫸偭偰偄偨偺傪廋惓
-丒僨僼僅儖僩愝掕傪VSYNC:OFF偐傜VSYNC:ON偵曄峏
+?コンパイラを謎物体さんのところのgcc 4.0.0に変更。
+?libc組み込み。謎物体さんのnewlibを使用。
+　ただしそのままではfwriteが激遅だったので、
+　stdio.hのBUF_SIZを32KBに増やしてコンパイルし直した。
+?zlib組み込み。makefileだけ弄ってそのままコンパイル。
+?ruka氏のunziplibをzlib向けに再構築。
+?libpng組み込み。makefileだけ弄ってそのままコンパイル。
+?pngの壁紙に対応
+?サムネイルのフォーマットをPNGに変更
+?SRAMファイルとステートファイルのGZIP圧縮
+?ステートセーブの高速化
+?ステートスロットの最大値を9に変更
+?SGBの描画を高速化（ゴッドメディスンで確認）
+?VSYNC:OFF時のウェイトが狂っていたのを修正
+?デフォルト設定をVSYNC:OFFからVSYNC:ONに変更
 
 v1.26
-丒sceKernelLibcClock偺愜傝曉偟帪偵僼儕乕僘偡傞僶僌傪廋惓
-丒僐儞僷僀儔傪gcc4.0.0乮psptoolchain乯偵曄峏
-丂乮幚峴偝傟傞偼偢偺側偄晹暘偺僐乕僪傪捛壛曄峏偟偨偩偗偱
-丂側偤偐慡懱偑廳偔側偭偨傝偟偰偄偨偺偑丄僐儞僷僀儔曄峏偱夝徚偟偨乯
+?sceKernelLibcClockの折り返し時にフリーズするバグを修正
+?コンパイラをgcc4.0.0（psptoolchain）に変更
+　（実行されるはずのない部分のコードを追加変更しただけで
+　なぜか全体が重くなったりしていたのが、コンパイラ変更で解消した）
 
 v1.25
-丒僼傽僀儖僜乕僩偺崅懍壔丂by ruka
-丒files傪巊梡慜偵僛儘僋儕傾丂by ruka
-丒Load State帪偵懄僎乕儉偵栠傞傛偆偵廋惓
-丒sgb偺奼挘巕偵懳墳
-丒MAX_ENTRY傪1024偐傜2048偵堷偒忋偘
-丒僗儕乕僾暅婣張棟傪傛傝惓偟偔
-丒愝掕偑曄峏偝傟偨偲偒偩偗僐儞僼傿僌曐懚偡傞傛偆偵偟偨
-丒彂屔撪僼傽僀儖慖戰
-丒VSYNC偵sceDisplayWaitVblank()傪巊偆傛偆偵偟偨
-丒ROM嶍彍帪偵OK偲CANCEL傪慖傋傞傛偆偵偟偨
-丒愒奜慄擖椡偵壖懳墳
-丂乮偱偨傜傔丅庴岝晹偺ON/OFF忬懺傪捈愙撉傔傟偽偁傞偄偼乧乯
-丒僶僢僥儕乕儔僀僼巆検傪昞帵乮build 2005/06/22乯
-丒CtrlRead傪CtrlPeek偵曄峏乮build 2005/06/24乯
-丒撉傒崬傒帪偵ROM TYPE傪昞帵 乮build 2005/06/24乯
-丒lzh懳墳偵娭偟偰偼徚旓儊儌儕検偑懡偄偺偱尒憲傝傑偟偨
-丂乮GBROM偺嵟戝梕検偼8MB乯
+?ファイルソートの高速化　by ruka
+?filesを使用前にゼロクリア　by ruka
+?Load State時に即ゲームに戻るように修正
+?sgbの拡張子に対応
+?MAX_ENTRYを1024から2048に引き上げ
+?スリープ復帰処理をより正しく
+?設定が変更されたときだけコンフィグ保存するようにした
+?書庫内ファイル選択
+?VSYNCにsceDisplayWaitVblank()を使うようにした
+?ROM削除時にOKとCANCELを選べるようにした
+?赤外線入力に仮対応
+　（でたらめ。受光部のON/OFF状態を直接読めればあるいは…）
+?バッテリーライフ残量を表示（build 2005/06/22）
+?CtrlReadをCtrlPeekに変更（build 2005/06/24）
+?読み込み時にROM TYPEを表示 （build 2005/06/24）
+?lzh対応に関しては消費メモリ量が多いので見送りました
+　（GBROMの最大容量は8MB）
 
 v1.24
-丒僆乕僶乕僋儘僢僋僆僾僔儑儞捛壛
-丒儊僯儏乕昞帵拞偼222MHz偵屌掕
-丒儊儌僗僥傾僋僙僗帪傕222MHz偵屌掕
-丒ROM僼僅儖僟偺僷僗傪曐懚
-丒儊僯儏乕偺帇擣惈傪岦忋
-丒ROM嶍彍婡擻捛壛
-丒SAVE THUMB傪ON偐傜OFF偵偟偰僗僥乕僩僙乕僽偡傞偲
-丂僗僥乕僩僼傽僀儖偩偗忋彂偒偝傟偰僒儉僱僀儖僼傽僀儖偑
-丂偦偺傑傑巆偭偰偟傑偄丄寢壥偲偟偰撪梕偲僒儉僱僀儖偑
-丂怘偄堘偭偰偟傑偆僶僌傪廋惓
-丒僎乕儉拞偺儊僢僙乕僕昞帵帪娫傪侾昩偵屌掕丅埲慜偼60僼儗乕儉
-丂僇僂儞僩偩偭偨偺偱丄僼儗乕儉僗僉僢僾嬶崌偵傛偭偰昞帵帪娫偑曄傢偭偰偨丅
-丒Nega-Posi偺柤慜傪Reverse偵曄峏
-丒儊僯儏乕昞帵拞偵僗儕乕僾偟偰偐傜暅婣偡傞偲僗儕乕僾僼儔僌偑
-丂棫偪丄偦傟偵傛傝僎乕儉嵞奐帪偵晄梫側僂僃僀僩偑偐偐偭偰偟傑偆僶僌傪廋惓
-丒僇乕僜儖偺揰柵張棟傪曄峏
-丒sceDisplayIsVblank偵傛傞VSYNC偺岠棪壔
-丒巊傢側偄僗僋儕乕儞僒僀僘偲GB COLOR傪柍岠壔偱偒傞傛偆偵偟偨丅
-丂乮僔儑乕僩僇僢僩僉乕偺摦嶌偵斀塮乯
-丒僔儑乕僩僇僢僩僉乕偺擖椡敾掕偱摨帪墴偟傪桪愭揑偵張棟
-丂乮僔儑乕僩僇僢僩僉乕傪價僢僩悢弴偵僜乕僩乯
-丒敿妏僼僅儞僩偺 + 偲 - 傪彂偒姺偊
+?オーバークロックオプション追加
+?メニュー表示中は222MHzに固定
+?メモステアクセス時も222MHzに固定
+?ROMフォルダのパスを保存
+?メニューの視認性を向上
+?ROM削除機能追加
+?SAVE THUMBをONからOFFにしてステートセーブすると
+　ステートファイルだけ上書きされてサムネイルファイルが
+　そのまま残ってしまい、結果として内容とサムネイルが
+　食い違ってしまうバグを修正
+?ゲーム中のメッセージ表示時間を１秒に固定。以前は60フレーム
+　カウントだったので、フレームスキップ具合によって表示時間が変わってた。
+?Nega-Posiの名前をReverseに変更
+?メニュー表示中にスリープしてから復帰するとスリープフラグが
+　立ち、それによりゲーム再開時に不要なウェイトがかかってしまうバグを修正
+?カーソルの点滅処理を変更
+?sceDisplayIsVblankによるVSYNCの効率化
+?使わないスクリーンサイズとGB COLORを無効化できるようにした。
+　（ショートカットキーの動作に反映）
+?ショートカットキーの入力判定で同時押しを優先的に処理
+　（ショートカットキーをビット数順にソート）
+?半角フォントの + と - を書き換え

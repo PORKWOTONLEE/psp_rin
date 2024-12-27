@@ -18,10 +18,10 @@
 */
 
 //--------------------------------------------------
-// APU(PSG?)僄儈儏儗乕僔儑儞晹 (儗僕僗僞/攇宍惗惉)
+// APU(PSG?)エミュレーション部 (レジスタ/波形生成)
 
-#define UPDATE_INTERVAL 172 // 1/256昩偁偨傝偺僒儞僾儖悢
-#define CLOKS_PER_INTERVAL 16384 // 1/256昩偁偨傝偺僋儘僢僋悢 (4MHz帪)
+#define UPDATE_INTERVAL 172 // 1/256秒あたりのサンプル数
+#define CLOKS_PER_INTERVAL 16384 // 1/256秒あたりのクロック数 (4MHz時)
 
 #include "gb.h"
 
@@ -141,7 +141,7 @@ void snd_reset()
 	byte gb_init_wav[]={0x06,0xFE,0x0E,0x7F,0x00,0xFF,0x58,0xDF,0x00,0xEC,0x00,0xBF,0x0C,0xED,0x03,0xF7};
 	byte gbc_init_wav[]={0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF,0x00,0xFF};
 
-	if (rom_get_info()->gb_type<=2) // 弶婜宆GB & SGB
+	if (rom_get_info()->gb_type<=2) // 初期型GB & SGB
 		memcpy(snd_mem+20,gb_init_wav,16);
 	else if (rom_get_info()->gb_type>=3) // GBC
 		memcpy(snd_mem+20,gbc_init_wav,16);
@@ -392,7 +392,7 @@ inline short snd_sq1_produce(int freq)
 			cur_sample=(cur_sample+(sq1_cur_pos>>16))&7;
 			sq1_cur_pos&=0xffff;
 		}*/
-		sq1_cur_pos+=(freq<<16)/44100;		//埖偄傪庒姳曄峏偟偨偺偱丄娭楢偱曄峏偑昁梫偵側偭偰傞偐傕丅徻嵶枹妋擣 - LCK
+		sq1_cur_pos+=(freq<<16)/44100;		//扱いを若干変更したので、関連で変更が必要になってるかも。詳細未確認 - LCK
 		if (sq1_cur_pos&0xffffe000){
 			cur_sample=(cur_sample+(sq1_cur_pos>>13))&7;
 			sq1_cur_pos&=0x1fff;
@@ -506,7 +506,7 @@ inline short snd_noi_produce(int freq)
 
 void snd_update()
 {
-	//偙偺儖乕僠儞偼cpu懁偲僒僂儞僪惗惉懁偱嫟梡偟偰偄傞偺偱丄偙偺counter傪嫟梡偡傞偺偼懡暘傛偔側偄偲巚傢傟丅昁梫帪偵廋惓偺偙偲  - LCK
+	//このルーチンはcpu側とサウンド生成側で共用しているので、このcounterを共用するのは多分よくないと思われ。必要時に修正のこと  - LCK
 	static int counter=0;
 
 //	if( snd_stat.master_enable ){
@@ -640,7 +640,7 @@ void snd_render(short *buf,int sample)
 			
 			/*
 			if (snd_b_lowpass){
-				// 弌椡傪僼傿儖僞儕儞僌
+				// 出力をフィルタリング
 				bef_sample_l[4]=bef_sample_l[3];
 				bef_sample_l[3]=bef_sample_l[2];
 				bef_sample_l[2]=bef_sample_l[1];
@@ -670,7 +670,7 @@ void snd_render(short *buf,int sample)
 		now_time += time_inc;
 	}
 
-	while (snd_que_count>cur){ // 庢傝偙傏偟
+	while (snd_que_count>cur){ // 取りこぼし
 		snd_process(snd_write_que[cur].adr,snd_write_que[cur].dat);
 		cur++;
 	}

@@ -34,7 +34,7 @@ void set_cpu_clock(int n)
 
 // -----------------------------------------------------------------------------
 
-// 儂乕儉儃僞儞廔椆帪偵僐乕儖僶僢僋
+// ホームボタン終了時にコールバック
 int exit_callback(void)
 {
 	bSleep=1;
@@ -49,8 +49,8 @@ int exit_callback(void)
 	return 0;
 }
 
-// 揹尮僗僀僢僠憖嶌帪傗晄掕婜偵僐乕儖僶僢僋丅
-// 偙偺娭悢偑傑偩幚峴拞偱傕僒僗儁儞僪丒僗僞儞僶僀偵擖傞壜擻惈偑偁傞丅
+// 電源スイッチ操作時や不定期にコールバック。
+// この関数がまだ実行中でもサスペンド?スタンバイに入る可能性がある。
 int power_callback(int unknown, int pwrflags)
 {
 	//if(pwrflags & (POWER_CB_SUSPEND|POWER_CB_STANDBY)){
@@ -58,9 +58,9 @@ int power_callback(int unknown, int pwrflags)
 		if (!bSleep){
 			bSleep=1;
 
-			// 僼傽僀儖傾僋僙僗拞偵僒僗儁儞僪丒僗僞儞僶僀偝傟偰
-			// 0byte偺僙乕僽僼傽僀儖偑偱偒偰偟傑偆偙偲偑偁傞偺偱丄
-			// 彂偒崬傒拞偼僒僗儁儞僪丒僗僞儞僶僀傪柍岠壔丅
+			// ファイルアクセス中にサスペンド?スタンバイされて
+			// 0byteのセーブファイルができてしまうことがあるので、
+			// 書き込み中はサスペンド?スタンバイを無効化。
 			sceKernelPowerLock(0);
 			set_cpu_clock(0);
 			save_config();
@@ -81,10 +81,10 @@ int power_callback(int unknown, int pwrflags)
 				save_sram(get_sram(), rom_get_info()->ram_size);
 			sceKernelPowerUnlock(0);
 			
-			// 嫮惂僒僗儁儞僪丅
-			// 僶僢僥儕偑栺10%傪愗傝僷儚乕儔儞僾偑揰柵傪巒傔傞偲丄
-			// 摦嶌偑嬌抂偵抶偔側傝僼儕乕僘偟偨傝僙乕僽偱偒側偔側偭偨傝偡傞丅
-			// 巗斕僎乕儉偱偼0%傑偱巊偊偰傞傛偆側偺偑撲丅
+			// 強制サスペンド。
+			// バッテリが約10%を切りパワーランプが点滅を始めると、
+			// 動作が極端に遅くなりフリーズしたりセーブできなくなったりする。
+			// 市販ゲームでは0%まで使えてるようなのが謎。
 			scePowerRequestSuspend(); 
 		}
 	}
@@ -92,25 +92,25 @@ int power_callback(int unknown, int pwrflags)
 		bSleep=0;
 	}
 
-	// 僐乕儖僶僢僋娭悢偺嵞搊榐
-	// 乮堦搙屇偽傟偨傜嵞搊榐偟偰偍偐側偄偲師偵僐乕儖僶僢僋偝傟側偄乯
+	// コールバック関数の再登録
+	// （一度呼ばれたら再登録しておかないと次にコールバックされない）
 //	int cbid = sceKernelCreateCallback("Power Callback", power_callback, NULL);
 //	scePowerRegisterCallback(0, cbid);
     return 0;
 }
 
-// 億乕儕儞僌梡僗儗僢僪
+// ポーリング用スレッド
 int CallbackThread(int args, void *argp)
 {
 	int cbid;
 	
-	// 僐乕儖僶僢僋娭悢偺搊榐
+	// コールバック関数の登録
 	cbid = sceKernelCreateCallback("Exit Callback", exit_callback, NULL);
 	sceKernelRegisterExitCallback(cbid);
 	cbid = sceKernelCreateCallback("Power Callback", power_callback, NULL);
 	scePowerRegisterCallback(0, cbid);
 	
-	// 億乕儕儞僌
+	// ポーリング
 	sceKernelSleepThreadCB();
 
 	return 0;
@@ -120,7 +120,7 @@ int SetupCallbacks(void)
 {
 	int thid = 0;
 	
-	// 億乕儕儞僌梡僗儗僢僪偺惗惉
+	// ポーリング用スレッドの生成
 	thid = sceKernelCreateThread("update_thread", CallbackThread, 0x11, 0xFA0, 0, 0);
 	if(thid >= 0)
 		sceKernelStartThread(thid, 0, 0);
@@ -160,8 +160,8 @@ void mainloop(void)
 		if (framecount>=60) {
 			unsigned long l;
 
-			//僼儗乕儉儗乕僩偺巜昗丅60僼儗乕儉偱偐偐偭偨帪娫(usec)傪侾俇恑偱昞帵丅
-			//僼儖僼儗乕儉偱0x000f4240偲側傝丄戝偒偄偲抶偄偙偲偵側傞丅夝憸搙偑埆偄偺偼姩曎丅 - LCK
+			//フレームレートの指標。60フレームでかかった時間(usec)を１６進で表示。
+			//フルフレームで0x000f4240となり、大きいと遅いことになる。解像度が悪いのは勘弁。 - LCK
 			framecount=0;
 			
 			pgcLocate(50,0);
@@ -297,7 +297,7 @@ void mainloop(void)
 			}
 			//<<<
 		}
-		// 儊僯儏乕
+		// メニュー
 		if(bMenu){
 			wavout_enable=0;
 			set_cpu_clock(0);
@@ -312,7 +312,7 @@ void mainloop(void)
 			bMenu = 0;
 		}
 		
-		// 僗儕乕僾
+		// スリープ
 		if(bSleep){
 			wavout_enable=0;
 			while(bSleep)
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
 		*(strrchr(tmp,'/')+1) = 0;
 		strcpy(setting.lastpath, tmp);
 
-		// 巜掕偟偨僼傽僀儖傪儘乕僪偡傞丅 by ruka
+		// 指定したファイルをロードする。 by ruka
 		romsize = load_rom(RomPath);
 		if (!romsize){
 			strcpy(filer_msg,"ROM Load Failed");

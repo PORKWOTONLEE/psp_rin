@@ -30,13 +30,13 @@ static void rin_frame_rewind(SETTING *local, long sel);
  *
  * 0 : Limit mode : memory amount
  * 1 : Preferred memory amount designed for rewind purposes (current max: 23mb): 9mb | Always use MAX
- *    rin_frame(" FDon't Use max ~FCancel ›FSave ");
- *    rin_frame(" FUse max <-FSub ->FAdd@~FCancel ›FSave ");
+ *    rin_frame("¡õ£ºDon't Use max ¡Á£ºCancel ¡ğ£ºSave ");
+ *    rin_frame("¡õ£ºUse max <-£ºSub ->£ºAdd¡¡¡Á£ºCancel ¡ğ£ºSave ");
  *
  * 0 : Limit mode : number of states
  * 1 : Preferred number of rewind states : 10 states | Always use MAX
- *    rin_frame(" FDon't Use max ~FCancel ›FSave ");
- *    rin_frame(" FUse max <-FSub ->FAdd@~FCancel ›FSave ");
+ *    rin_frame("¡õ£ºDon't Use max ¡Á£ºCancel ¡ğ£ºSave ");
+ *    rin_frame("¡õ£ºUse max <-£ºSub ->£ºAdd¡¡¡Á£ºCancel ¡ğ£ºSave ");
  */
 
 static void rin_menu_rewind_get_config_toogle_max(SETTING *local) {
@@ -221,19 +221,19 @@ static char* rin_frame_get_title(){
 }
 
 static void rin_frame_rewind_use_max() {
-	rin_frame(rin_frame_get_title()," FDon't use max ~FCancel ›FSave ");
+	rin_frame(rin_frame_get_title(),"¡õ£ºDon't use max ¡Á£ºCancel ¡ğ£ºSave ");
 }
 
 static void rin_frame_rewind_no_max(){
-	rin_frame(rin_frame_get_title()," FUse max ©FSub ¨FAdd@¢:(press) Fine tune ~FCancel ›FSave ");
+	rin_frame(rin_frame_get_title(),"¡õ£ºUse max ¡û£ºSub ¡ú£ºAdd¡¡¡÷:(press) Fine tune ¡Á£ºCancel ¡ğ£ºSave ");
 }
 
 static void rin_frame_rewind_disabled(){
-	rin_frame(rin_frame_get_title(),"¢: Enable Rewind ~FCancel ›FSave ");
+	rin_frame(rin_frame_get_title(),"¡÷: Enable Rewind ¡Á£ºCancel ¡ğ£ºSave ");
 }
 
 static void rin_frame_rewind_change_mode(){
-	rin_frame(rin_frame_get_title(),"©¨FChange limit mode ¢: Disable Rewind ~FCancel ›FSave ");
+	rin_frame(rin_frame_get_title(),"¡û¡ú£ºChange limit mode ¡÷: Disable Rewind ¡Á£ºCancel ¡ğ£ºSave ");
 }
 
 char *rin_menu_rewind_get_main_menu_string() {

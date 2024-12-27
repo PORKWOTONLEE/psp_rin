@@ -186,7 +186,7 @@ int load_menu_bg()
 	return read_bitmap(path,bgBitmap,sizeof(bgBitmap));
 }
 
-// 敿摟柧張棟
+// 半透明処理
 unsigned short rgbTransp(unsigned short fgRGB, unsigned short bgRGB, int alpha) {
 	unsigned short fgR, fgG, fgB;
 	unsigned short bgR, bgG, bgB;
@@ -223,25 +223,25 @@ void rin_frame(const char *msg0, const char *msg1)
 {
 	char tmp[128];
 
-	// 攚宨
+	// 背景
 	if(bBitmap)
 		pgBitBlt(0,0,480,272,1,bgBitmap);
 	else
 		pgFillvram(setting.color[0]);
 
-	// 僶乕僕儑儞僫儞僶乕
-	sprintf(tmp, "仭 俼俬俶 Ver%s 仭", VERRIN);
+	// バージョンナンバー
+	sprintf(tmp, "■ ＲＩＮ Ver%s ■", VERRIN);
 	mh_print(465-strlen(tmp)*5, 0, tmp, setting.color[1]);
 
-	// 儊僢僙乕僕側偳
+	// メッセージなど
 	if(msg0) mh_print(17, 14, msg0, setting.color[2]);
 	pgDrawFrame(17,25,463,248,setting.color[1]);
 	pgDrawFrame(18,26,462,247,setting.color[1]);
 
-	// 憖嶌愢柧
+	// 操作説明
 	if(msg1) mh_print(17, 252, msg1, setting.color[2]);
 
-	// 僶僢僥儕乕儔僀僼
+	// バッテリーライフ
 	if(scePowerIsBatteryExist()){
 		sprintf(tmp,"Battery[%d%%]",scePowerGetBatteryLifePercent());
 		if(!scePowerIsPowerOnline()){
@@ -263,9 +263,9 @@ int rin_MessageBox(const char *msg, int type){
 		}
 
 		if(type)
-			rin_frame(0,"仜丗OK  亊丗Cancel");
+			rin_frame(0,"○：OK  ×：Cancel");
 		else
-			rin_frame(0,"仜丗OK");
+			rin_frame(0,"○：OK");
 		mh_print(28,32,msg,setting.color[3]);
 		pgScreenFlipV();
 	}
@@ -331,7 +331,7 @@ void rin_colorconfig(void)
 				}
 				break;
 			case BG_BRIGHT:
-				//婸搙曄峏
+				//輝度変更
 				setting.bgbright += 10;
 				if(setting.bgbright > 100) setting.bgbright=0;
 				if(bBitmap){
@@ -346,7 +346,7 @@ void rin_colorconfig(void)
 			}
 		}else if(new_pad & CTRL_SQUARE){
 			if(sel == BG_BRIGHT) {
-				//婸搙曄峏
+				//輝度変更
 				if(setting.bgbright > 10)
 					setting.bgbright-=10;
 				else
@@ -391,9 +391,9 @@ void rin_colorconfig(void)
 		y = 5;
 
 		if(sel>=COLOR0_R && sel<=BG_BRIGHT)
-			strcpy(msg, "仜丗Add丂仩丗Sub 亊丗Return");
+			strcpy(msg, "○：Add　□：Sub ×：Return");
 		else
-			strcpy(msg, "仜丗OK 亊丗Return");
+			strcpy(msg, "○：OK ×：Return");
 
 		rin_frame(0, msg);
 
@@ -417,7 +417,7 @@ void rin_colorconfig(void)
 			pgPrint(x,y++,setting.color[3],"  BG BRIGHT:100%");
 		else
 			pgPrint(x,y++,setting.color[3],"  BG BRIGHT:  0%");
-		if(setting.bgbright % 100 != 0)			// 10%乣90%
+		if(setting.bgbright % 100 != 0)			// 10%?90%
 			pgPutChar((x+13)*8,(y-1)*8,setting.color[3],0,'0'+setting.bgbright/10,1,0,1);
 		y++;
 		pgPrint(x,y++,setting.color[3],"  Return to Main Menu");
@@ -556,9 +556,9 @@ void rin_keyconfig(void)
 		if (crs_count++>=30) crs_count=0;
 
 		if(sel>=CONFIG_ANALOG2DPAD)
-			strcpy(msg,"仜丗OK");
+			strcpy(msg,"○：OK");
 		else
-			strcpy(msg,"仼仺丗Clear");
+			strcpy(msg,"←→：Clear");
 
 		rin_frame(0, msg);
 
@@ -693,7 +693,7 @@ int rin_gbtype(int n)
 			if(sel<0) sel=0;
 		}
 
-		rin_frame("Select GB Type", "仜丗OK  亊丗Cancel");
+		rin_frame("Select GB Type", "○：OK  ×：Cancel");
 
 		x=4, y=5;
 		pgPrint(x++,y++,setting.color[3],"GB TYPE:");
@@ -735,9 +735,9 @@ int rin_screensize(int n)
 		}
 
 		if(setting.bScreenSizes[sel])
-			rin_frame("Select Screen Size", "仜丗OK  亊丗Cancel   SELECT丗Disable");
+			rin_frame("Select Screen Size", "○：OK  ×：Cancel   SELECT：Disable");
 		else
-			rin_frame("Select Screen Size", "仜丗OK  亊丗Cancel   SELECT丗Enable");
+			rin_frame("Select Screen Size", "○：OK  ×：Cancel   SELECT：Enable");
 
 		x=4, y=5;
 		pgPrint(x++,y++,setting.color[3],"SCREEN SIZE:");
@@ -782,9 +782,9 @@ int rin_gbcolor(int n)
 		}
 
 		if(setting.bGB_Pals[sel])
-			rin_frame("Select GB Palette", "仜丗OK  亊丗Cancel   SELECT:Disable");
+			rin_frame("Select GB Palette", "○：OK  ×：Cancel   SELECT:Disable");
 		else
-			rin_frame("Select GB Palette", "仜丗OK  亊丗Cancel   SELECT:Enable");
+			rin_frame("Select GB Palette", "○：OK  ×：Cancel   SELECT:Enable");
 
 		x=4, y=5;
 		pgPrint(x++,y++,setting.color[3],"GB PALETTE:");
@@ -825,7 +825,7 @@ int rin_frameskip(int sel)
 			if(sel<0) sel=0;
 		}
 
-		rin_frame("Select Max Frame Skip", "仜丗OK  亊丗Cancel");
+		rin_frame("Select Max Frame Skip", "○：OK  ×：Cancel");
 
 		x=4, y=5;
 		pgPrint(x++,y++,setting.color[3],"MAX FRAME SKIP:");
@@ -861,7 +861,7 @@ int rin_cpuclock(int sel)
 			if(sel<0) sel=2;
 		}
 
-		rin_frame("Select CPU Clock (DANGER! DANGER! DANGER! DANGER! DANGER!)", "仜丗OK  亊丗Cancel");
+		rin_frame("Select CPU Clock (DANGER! DANGER! DANGER! DANGER! DANGER!)", "○：OK  ×：Cancel");
 
 		x=4, y=5;
 		pgPrint(x++,y++,setting.color[3],"CPU CLOCK:");
@@ -895,7 +895,7 @@ int rin_sound_buffers(int sel)
 			if(sel<0) sel=2;
 		}
 
-		rin_frame("Select Sound Buffer", "仜丗OK  亊丗Cancel");
+		rin_frame("Select Sound Buffer", "○：OK  ×：Cancel");
 
 		x=4, y=5;
 		pgPrint(x++,y++,setting.color[3],"SOUND BUFFER:");
@@ -1050,7 +1050,7 @@ int rin_stateslot(int type)
 		default:
 			p = NULL;
 		}
-		rin_frame(p,"仜丗OK  亊丗Cancel   SELECT丗Remove");
+		rin_frame(p,"○：OK  ×：Cancel   SELECT：Remove");
 
 		if ((sel>STATE_SLOT_MAX && state_tmp) ||
 			(sel<=STATE_SLOT_MAX && nState[sel]>=0 && nThumb[sel]>=0)){
@@ -1142,9 +1142,9 @@ void select_cheat(void)
 		if(sel >= top+rows)		top=sel-rows+1;
 		if(sel < top)			top=sel;
 
-		rin_frame("","仜丗OK  亊丗Return  仩丗All");
+		rin_frame("","○：OK  ×：Return  □：All");
 
-		// 僗僋儘乕儖僶乕
+		// スクロールバー
 		if(nCheats > rows){
 			h = 219;
 			pgDrawFrame(445,25,446,248,setting.color[1]);
@@ -1354,7 +1354,7 @@ void rin_menu(void)
 
 					gb_init();
 
-					// 巜掕偟偨僼傽僀儖傪儘乕僪偡傞丅 by ruka
+					// 指定したファイルをロードする。 by ruka
 					romsize = load_rom(RomPath);
 					if (!romsize){
 						strcpy(filer_msg,"ROM Load Failed");
@@ -1428,7 +1428,7 @@ void rin_menu(void)
 		if(!bLoop) break;
 		if (crs_count++>=30) crs_count=0;
 
-		rin_frame(msg, "仜丗OK  亊丗Continue  MenuBTN丗Continue  仮: Credits");
+		rin_frame(msg, "○：OK  ×：Continue  MenuBTN：Continue  △: Credits");
 
 		x = 4;
 		y = 4;

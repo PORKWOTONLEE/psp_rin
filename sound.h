@@ -2,8 +2,8 @@
 extern int wavout_enable;
 extern unsigned long cur_play;
 
-//僒僂儞僪僶僢僼傽侾僶儞僋偁偨傝偺梕検丅係僶儞僋偱揔摉偵儔僂儞僪儘價儞
-//PGA_SAMPLES偺攞悢偵偡傞偙偲丅PGA_SAMPLES偲摨偠偩偲懡暘僟儊側偺偱拲堄丅 - LCK
+//サウンドバッファ１バンクあたりの容量。４バンクで適当にラウンドロビン
+//PGA_SAMPLESの倍数にすること。PGA_SAMPLESと同じだと多分ダメなので注意。 - LCK
 #define MAX_SOUND_BANKLEN 2048
 
 extern short sound_buf[MAX_SOUND_BANKLEN*4*2];

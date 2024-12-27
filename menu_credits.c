@@ -39,7 +39,7 @@ void rin_menu_credits() {
 		if (new_pad & (CTRL_CIRCLE|CTRL_TRIANGLE|CTRL_CROSS|CTRL_SQUARE)) {
 			return;
 		}
-		rin_frame("Credits","¢›~ FReturn to previous menu ");
+		rin_frame("Credits","¡÷¡ğ¡Á¡õ£ºReturn to previous menu ");
 		unsigned y = 4;
 		unsigned x = 4;
 		for(i = 0 ; i < credits_len ; ++i){

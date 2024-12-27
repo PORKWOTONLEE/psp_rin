@@ -39,7 +39,7 @@ void cheat_init()
 	cheat_clear();
 }
 
-//’Z‚­‚µ‚ÄƒCƒ“ƒ‰ƒCƒ“‚É‚Ô‚¿‚±‚Ş - LCK
+//¶Ì¤¯¤·¤Æ¥¤¥ó¥é¥¤¥ó¤Ë¤Ö¤Á¤³¤à - LCK
 extern void cpu_write_direct_ord(word adr,byte dat);
 inline void cpu_write_direct(word adr,byte dat)
 {
@@ -50,7 +50,7 @@ inline void cpu_write_direct(word adr,byte dat)
 			ram[adr&0x0fff]=dat;
 	} else if ((adr&0xe000)==0xa000) {
 		if (mbc_is_ext_ram())
-			mbc_get_sram()[adr&0x1FFF]=dat;//ƒJ[ƒgƒŠƒbƒWRAM
+			mbc_get_sram()[adr&0x1FFF]=dat;//¥«©`¥È¥ê¥Ã¥¸RAM
 		else
 			mbc_ext_write(adr,dat);
 	} else {
@@ -92,7 +92,7 @@ void cheat_decreate_cheat_map()
 	}
 }
 
-//’Z‚­‚µ‚ÄƒCƒ“ƒ‰ƒCƒ“‚É‚Ô‚¿‚±‚Ş - LCK
+//¶Ì¤¯¤·¤Æ¥¤¥ó¥é¥¤¥ó¤Ë¤Ö¤Á¤³¤à - LCK
 //inline byte cpu_read_direct(word adr)
 extern byte cpu_read_direct_ord(word adr);
 inline byte cpu_read(word adr)

@@ -207,7 +207,7 @@ int read_bitmap(char *path, unsigned short *out, size_t outlen)
 }
 
 /*
-// PackBitsˆ³k•„†‰»
+// PackBitsˆR¿s·ûºÅ»¯
 int PackBits_encode( byte *in, byte *out, int size )
 {
 	byte ltr[128], bak, cur, *wp=out;
@@ -262,7 +262,7 @@ int PackBits_encode( byte *in, byte *out, int size )
 }
 */
 
-// PackBitsˆ³k•¡‡‰»
+// PackBitsˆR¿sÑ}ºÏ»¯
 int PackBits_decode( byte *in, byte *out, int size )
 {
 	byte *limit=in+size, *wp=out;

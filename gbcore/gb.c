@@ -18,7 +18,7 @@
 */
 
 //-------------------------------------------------
-// GB 偦偺懠僄儈儏儗乕僔儑儞晹/奜晹偲偺僀儞僞乕僼僃乕僗
+// GB その他エミュレーション部/外部とのインターフェース
 
 #include "gb.h"
 #include "../menu.h"
@@ -30,7 +30,7 @@ int now_gb_mode;
 struct gb_regs g_regs;
 struct gbc_regs cg_regs;
 
-word dmy[160*5]; // vframe 偼傒弌偟偨帪梡
+word dmy[160*5]; // vframe はみ出した時用
 word vframe_mem[SIZE_LINE*(144+112)];
 #ifdef USE_GPU
 word *vframe = (word*)0x040CC000;
@@ -56,7 +56,7 @@ void gb_init(void)
 {
 	lcd_init();
 	rom_init();
-	apu_init();// ROM傛傝屻偵嶌傜傟偨偟
+	apu_init();// ROMより後に作られたし
 	mbc_init();
 	cpu_init();
 	sgb_init();
@@ -158,7 +158,7 @@ bool gb_load_rom(byte *buf,int size,byte *ram,int ram_size)
 
 size_t gb_save_state(byte *out)
 {
-	const int tbl_ram[]={1,1,1,4,16,8}; // 0偲1偼曐尟
+	const int tbl_ram[]={1,1,1,4,16,8}; // 0と1は保険
 	byte *outbak = out;
 
 	if (outbak)
@@ -186,24 +186,24 @@ size_t gb_save_state(byte *out)
 		write_state(&g_regs,sizeof(struct gb_regs),out,outbak);//sys_reg
 		int halt=((*cpu_get_halt())?1:0);
 		write_state(&halt,sizeof(int),out,outbak);
-		write_state(&dmy,sizeof(int),out,outbak); // 尦偺斉偱偼僔儕傾儖捠怣捠怣枮椆傑偱偺僋儘僢僋悢
-		                                               // (捠怣偺巇條偑戝暆偵曄傢偭偨偨傔僟儈乕偱杽傔偰偄傞)
+		write_state(&dmy,sizeof(int),out,outbak); // 元の版ではシリアル通信通信満了までのクロック数
+		                                               // (通信の仕様が大幅に変わったためダミーで埋めている)
 		int mbc_dat=mbc_get_state();
 		write_state(&mbc_dat,sizeof(int),out,outbak);//MBC
 
 		int ext_is=mbc_is_ext_ram()?1:0;
 		write_state(&ext_is,sizeof(int),out,outbak);
 
-		// ver 1.1 捛壛
+		// ver 1.1 追加
 		write_state(apu_get_stat_cpu(),sizeof(struct apu_stat),out,outbak);
 		write_state(apu_get_mem(),0x30,out,outbak);
 		write_state(apu_get_stat_gen(),sizeof(struct apu_stat),out,outbak);
 
 		byte resurved[256];
 		memset(resurved,0,256);
-		write_state(resurved,256,out,outbak);//彨棃偺偨傔偵妋曐
+		write_state(resurved,256,out,outbak);//将来のために確保
 		
-		// RIN奼挘
+		// RIN拡張
 		if(now_gb_mode==2){
 			write_state(&sgb_mode, sizeof(int),out,outbak);
 			write_state(&bit_received, sizeof(int),out,outbak);
@@ -264,7 +264,7 @@ size_t gb_save_state(byte *out)
 		write_state(lcd_get_pal(0),sizeof(word)*(8*4*2),out,outbak);//palette	//color
 		int halt=((*cpu_get_halt())?1:0);
 		write_state(&halt,sizeof(int),out,outbak);
-		write_state(&dmy,sizeof(int),out,outbak); // 尦偺斉偱偼僔儕傾儖捠怣捠怣枮椆傑偱偺僋儘僢僋悢
+		write_state(&dmy,sizeof(int),out,outbak); // 元の版ではシリアル通信通信満了までのクロック数
 
 		int mbc_dat=mbc_get_state();
 		write_state(&mbc_dat,sizeof(int),out,outbak);//MBC
@@ -272,7 +272,7 @@ size_t gb_save_state(byte *out)
 		int ext_is=mbc_is_ext_ram()?1:0;
 		write_state(&ext_is,sizeof(int),out,outbak);
 
-		//偦偺懠彅乆
+		//その他諸々
 		write_state(cpu_dat+2,sizeof(int),out,outbak);	//color
 		write_state(cpu_dat+3,sizeof(int),out,outbak);	//color
 		write_state(cpu_dat+4,sizeof(int),out,outbak);	//color
@@ -280,7 +280,7 @@ size_t gb_save_state(byte *out)
 		write_state(cpu_dat+6,sizeof(int),out,outbak);	//color
 		write_state(cpu_dat+7,sizeof(int),out,outbak);	//color
 
-		// ver 1.1 捛壛
+		// ver 1.1 追加
 		write_state(apu_get_stat_cpu(),sizeof(struct apu_stat),out,outbak);
 		write_state(apu_get_mem(),0x30,out,outbak);
 		write_state(apu_get_stat_gen(),sizeof(struct apu_stat),out,outbak);
@@ -289,7 +289,7 @@ size_t gb_save_state(byte *out)
 		memset(resurved,0,256);
 //		resurved[0]=1;
 		write_state(&reload,1,out,outbak);
-		write_state(resurved,256,out,outbak);//彨棃偺偨傔偵妋曐
+		write_state(resurved,256,out,outbak);//将来のために確保
 	}
 
 	if(outbak)
@@ -310,7 +310,7 @@ size_t gb_save_state(byte *out)
 
 void gb_restore_state(gzFile fd, const byte *buf)
 {
-	const int tbl_ram[]={1,1,1,4,16,8}; // 0偲1偼曐尟
+	const int tbl_ram[]={1,1,1,4,16,8}; // 0と1は保険
 	int gb_type,dmy;
 	
 	read_state(fd, &gb_type, sizeof(int));
@@ -344,12 +344,12 @@ void gb_restore_state(gzFile fd, const byte *buf)
 		read_state(fd, &ext_is,sizeof(int));
 		mbc_set_ext_is(ext_is?true:false);
 
-		// ver 1.1 捛壛
+		// ver 1.1 追加
 //		byte tmp[256],tester[100];
-//		read_state(fd, tmp, 100); // 偲傝偁偊偢挷傋偰傒傞
+//		read_state(fd, tmp, 100); // とりあえず調べてみる
 //		_memset(tester,0,100);
 //		if (_memcmp(tmp,tester,100)!=0){
-			// apu 晹暘
+			// apu 部分
 //			sceIoLseek(fd, -100, 1);
 			read_state(fd, apu_get_stat_cpu(),sizeof(struct apu_stat));
 			read_state(fd, apu_get_mem(),0x30);
@@ -357,9 +357,9 @@ void gb_restore_state(gzFile fd, const byte *buf)
 //		}
 
 		byte resurved[256];
-		read_state(fd, resurved, 256);//彨棃偺偨傔偵妋曐
+		read_state(fd, resurved, 256);//将来のために確保
 		
-		// RIN奼挘
+		// RIN拡張
 		if(gb_type==2 && sgb_mode){
 			int dmy;
 			read_state(fd, &dmy, sizeof(int));
@@ -422,7 +422,7 @@ void gb_restore_state(gzFile fd, const byte *buf)
 		int halt;
 		read_state(fd, &halt,sizeof(int));
 		*cpu_get_halt()=(halt?true:false);
-		read_state(fd, &dmy,sizeof(int)); // 尦偺斉偱偼僔儕傾儖捠怣捠怣枮椆傑偱偺僋儘僢僋悢
+		read_state(fd, &dmy,sizeof(int)); // 元の版ではシリアル通信通信満了までのクロック数
 
 		int mbc_dat;
 		read_state(fd, &mbc_dat,sizeof(int)); // MBC
@@ -431,7 +431,7 @@ void gb_restore_state(gzFile fd, const byte *buf)
 		read_state(fd, &ext_is,sizeof(int));
 		mbc_set_ext_is(ext_is?true:false);
 
-		//偦偺懠彅乆
+		//その他諸々
 		read_state(fd, cpu_dat+2,sizeof(int));
 		read_state(fd, cpu_dat+3,sizeof(int));
 		read_state(fd, cpu_dat+4,sizeof(int));
@@ -440,19 +440,19 @@ void gb_restore_state(gzFile fd, const byte *buf)
 		read_state(fd, cpu_dat+7,sizeof(int));
 		cpu_restore_state(cpu_dat);
 
-		// ver 1.1 捛壛
+		// ver 1.1 追加
 //		byte tmp[256],tester[100];
-//		read_state(fd, tmp,100); // 偲傝偁偊偢挷傋偰傒傞
+//		read_state(fd, tmp,100); // とりあえず調べてみる
 //		_memset(tester,0,100);
 //		if (_memcmp(tmp,tester,100)!=0){
-			// apu 晹暘
+			// apu 部分
 //			sceIoLseek(fd, -100, 1);
 			read_state(fd, apu_get_stat_cpu(),sizeof(struct apu_stat));
 			read_state(fd, apu_get_mem(),0x30);
 			read_state(fd, apu_get_stat_gen(),sizeof(struct apu_stat));
 
 //			read_state(fd, tmp,1);
-			/* renderer_map_color偐傜lcd_get_mapped_pal傊偺曄峏偼晄梫偵側傝傑偟偨丅 ruka
+			/* renderer_map_colorからlcd_get_mapped_palへの変更は不要になりました。 ruka
 			int i;
 			if (tmp[0])
 				for (i=0;i<64;i++)
@@ -465,7 +465,7 @@ void gb_restore_state(gzFile fd, const byte *buf)
 			}*/
 //		}
 		byte resurved[256];
-		read_state(fd, resurved,256);//彨棃偺偨傔偵妋曐
+		read_state(fd, resurved,256);//将来のために確保
 	}
 
 	cheat_create_cheat_map();
@@ -473,7 +473,7 @@ void gb_restore_state(gzFile fd, const byte *buf)
 
 void gb_refresh_pal()
 {
-	/* renderer_map_color偐傜lcd_get_mapped_pal傊偺曄峏偼晄梫偵側傝傑偟偨丅 ruka
+	/* renderer_map_colorからlcd_get_mapped_palへの変更は不要になりました。 ruka
 	int i;
 	for (i=0;i<64;i++)
 		lcd_get_mapped_pal(i>>2)[i&3]=renderer_map_color(lcd_get_pal(i>>2)[i&3]);
@@ -483,7 +483,7 @@ void gb_refresh_pal()
 void gb_run()
 {
 	if (rom_get_loaded()){
-		if (g_regs.LCDC&0x80){ // LCDC 婲摦帪
+		if (g_regs.LCDC&0x80){ // LCDC 起動時
 			g_regs.LY=(g_regs.LY+1)%154;
 
 			g_regs.STAT&=0xF8;
@@ -503,7 +503,7 @@ void gb_run()
 				lcd_clear_win_count();
 //				skip=skip_buf;
 			}
-			if (g_regs.LY>=144){ // VBlank 婜娫拞
+			if (g_regs.LY>=144){ // VBlank 期間中
 				g_regs.STAT|=1;
 				if (g_regs.LY==144){
 					cpu_exec(72);
@@ -515,13 +515,13 @@ void gb_run()
 				else if (g_regs.LY==153){
 					cpu_exec(80);
 					g_regs.LY=0;
-					cpu_exec(456-80); // 慜偺儔僀儞偺偐側傝憗栚偐傜0偵側傞傛偆偩丅
+					cpu_exec(456-80); // 前のラインのかなり早目から0になるようだ。
 					g_regs.LY=153;
 				}
 				else
 					cpu_exec(456);
 			}
-			else{ // VBlank 婜娫奜
+			else{ // VBlank 期間外
 				g_regs.STAT|=2;
 				if (g_regs.STAT&0x20)
 					cpu_irq(INT_LCDC);
@@ -599,7 +599,7 @@ void gb_run()
 				}
 			}
 		}
-		else{ // LCDC 掆巭帪
+		else{ // LCDC 停止時
 			g_regs.LY=0;
 //			g_regs.LY=(g_regs.LY+1)%154;
 			re_render++;

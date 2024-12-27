@@ -20,8 +20,8 @@
 // 2005.05 major structure change by LCK
 
 //-------------------------------------------------------
-// LCD 僄儈儏儗乕僔儑儞晹
-// inline assembler 偁傝 揔媂曄峏偣傛
+// LCD エミュレーション部
+// inline assembler あり 適宜変更せよ
 
 #include "gb.h"
 
@@ -44,72 +44,72 @@ const char *pal_names[] = {
 };
 
 const word m_pal16[14][3][4] = {
-	{	// 儌僲僋儘(Monochrome) -GB
+	{	// モノクロ(Monochrome) -GB
 		{RGB(255,255,255), RGB(168,168,168), RGB(88,88,88), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(168,168,168), RGB(88,88,88), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(168,168,168), RGB(88,88,88), RGB(0,0,0)} },
 		
-	{	// 柧傞偄僙僺傾(Bright Sepia)
+	{	// 明るいセピア(Bright Sepia)
 		{RGB(255,255,255), RGB(255,204,153), RGB(153,76,0), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,153), RGB(153,76,0), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,153), RGB(153,76,0), RGB(0,0,0)} },
 		
-	{	// 愒(Red)
+	{	// 赤(Red)
 		{RGB(255,255,255), RGB(255,204,204), RGB(127,51,51), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(204,255,204), RGB(51,127,51), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(127,204,204), RGB(51,127,204),RGB(0,0,0)} },
 		
-	{	// 埫偄僙僺傾(Dark Sepia)
+	{	// 暗いセピア(Dark Sepia)
 		{RGB(255,255,255), RGB(204,178,153), RGB(153,127,76),RGB(76,51,0)},
 		{RGB(255,255,255), RGB(255,204,153), RGB(153,76,0),  RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,153), RGB(153,76,0),  RGB(0,0,0)} },
 		
-	{	// 僷僗僥儖僇儔乕(Pastel Color)
+	{	// パステルカラー(Pastel Color)
 		{RGB(255,255,255), RGB(255,204,204), RGB(127,204,255), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,204), RGB(127,204,255), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,204), RGB(127,204,255), RGB(0,0,0)} },
 		
-	{	// 僆儗儞僕(Orange)
+	{	// オレンジ(Orange)
 		{RGB(255,255,255), RGB(229,204,102), RGB(204,51,51), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(229,204,102), RGB(204,51,51), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(229,204,102), RGB(204,51,51), RGB(0,0,0)} },
 		
-	{	// 墿(Yellow)
+	{	// 黄(Yellow)
 		{RGB(255,255,255), RGB(255,204,153), RGB(127,76,25), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(127,204,204), RGB(51,127,204),RGB(0,0,0)},
 		{RGB(255,255,255), RGB(204,255,204), RGB(51,127,51), RGB(0,0,0)} },
 		
-	{	// 柧傞偄惵(Bright Blue)
+	{	// 明るい青(Bright Blue)
 		{RGB(255,255,255), RGB(127,204,204), RGB(51,127,204),RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,204), RGB(127,51,51), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(204,255,204), RGB(51,127,51), RGB(0,0,0)} },
 		
-	{	// 埫偄惵(Dark Blue)
+	{	// 暗い青(Dark Blue)
 		{RGB(255,255,255), RGB(178,204,229), RGB(102,127,127),RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,204), RGB(127,51,51),  RGB(0,0,0)},
 		{RGB(255,255,255), RGB(255,204,153), RGB(153,76,0),   RGB(0,0,0)} },
 		
-	{	// 僌儗乕(Gray)
+	{	// グレー(Gray)
 		{RGB(255,255,255), RGB(178,204,178), RGB(76,102,76), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(178,204,178), RGB(76,102,76), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(178,204,178), RGB(76,102,76), RGB(0,0,0)} },
 		
-	{	// 柧傞偄椢(Bright Green)
+	{	// 明るい緑(Bright Green)
 		{RGB(255,255,255), RGB(127,229,127), RGB(255,127,204), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(127,229,127), RGB(255,127,204), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(127,229,127), RGB(255,127,204), RGB(0,0,0)} },
 		
-	{	// 埫偄椢(Dark Green) -Default
+	{	// 暗い緑(Dark Green) -Default
 		{RGB(255,255,255), RGB(127,204,127), RGB(51,153,178),RGB(0,0,0)},
 		{RGB(255,255,255), RGB(204,153,153), RGB(127,51,51), RGB(0,0,0)},
 		{RGB(255,255,255), RGB(204,153,153), RGB(127,51,51), RGB(0,0,0)} },
 		
-	{	// 斀揮(Reverse)
+	{	// 反転(Reverse)
 		{RGB(0,0,0), RGB(51,178,178), RGB(255,204,153), RGB(255,255,255)},
 		{RGB(0,0,0), RGB(51,178,178), RGB(255,204,153), RGB(255,255,255)},
 		{RGB(0,0,0), RGB(51,178,178), RGB(255,204,153), RGB(255,255,255)} },
 		
-	{	// SGB僷儗僢僩曄姺梡
+	{	// SGBパレット変換用
 		{0, 1, 2, 3}, {0, 1, 2, 3}, {0, 1, 2, 3}
 	}
 };
@@ -123,9 +123,9 @@ int sprite_count;
 bool layer_enable[3];
 
 byte ztbls[76];
-//媽trans_tbl
+//旧trans_tbl
 #define ztbl1 (ztbls+12)
-//媽trans_tbl&&priority_tbl
+//旧trans_tbl&&priority_tbl
 #define ztbl2 (ztbls+44)
 
 void lcd_init(void)
@@ -164,16 +164,16 @@ void lcd_reset()
 
 
 /* - LCK
-word偺夋憸僨乕僞偼俀僶僀僩侾慻偱俉僪僢僩暘傪昞偟偰偄傞
-侾僪僢僩偼俀價僢僩偱昞偝傟丄僷儗僢僩斣崋傪巜掕偡傞
+wordの画像データは２バイト１組で８ドット分を表している
+１ドットは２ビットで表され、パレット番号を指定する
 
   addr 0   addr 1
-  76543210 fedcba98     (價僢僩斣崋)
-   伀
+  76543210 fedcba98     (ビット番号)
+   ↓
   dot0  dot1  dot2  dot3  dot4  dot5  dot6  dot7
-  f7    e6    d5    c4    b3    a2    91    80     (價僢僩斣崋)
+  f7    e6    d5    c4    b3    a2    91    80     (ビット番号)
 
-帒椏偵偁偨偭偰偍傜偢僐乕僪傪撉傫偩寢壥側偺偱僂僜偐傕丅尨揟偵偁偨傞傋偟丅
+資料にあたっておらずコードを読んだ結果なのでウソかも。原典にあたるべし。
 */
 
 static const int sgb_palette_table[]={
@@ -211,7 +211,7 @@ static const int sgb_palette_table[]={
 	0x00, 0x7D, 0x7E, 0x7F
 };
 
-//僶僀僩僨乕僞偺價僢僩弴傪媡弴偵偡傞偨傔偺僥乕僽儖
+//バイトデータのビット順を逆順にするためのテーブル
 static const unsigned char tbl_bitrev[]={
 	0x00,0x80,0x40,0xC0,0x20,0xA0,0x60,0xE0,0x10,0x90,0x50,0xD0,0x30,0xB0,0x70,0xF0,0x08,0x88,0x48,0xC8,0x28,0xA8,0x68,0xE8,0x18,0x98,0x58,0xD8,0x38,0xB8,0x78,0xF8,
 	0x04,0x84,0x44,0xC4,0x24,0xA4,0x64,0xE4,0x14,0x94,0x54,0xD4,0x34,0xB4,0x74,0xF4,0x0C,0x8C,0x4C,0xCC,0x2C,0xAC,0x6C,0xEC,0x1C,0x9C,0x5C,0xDC,0x3C,0xBC,0x7C,0xFC,
@@ -223,7 +223,7 @@ static const unsigned char tbl_bitrev[]={
 	0x07,0x87,0x47,0xC7,0x27,0xA7,0x67,0xE7,0x17,0x97,0x57,0xD7,0x37,0xB7,0x77,0xF7,0x0F,0x8F,0x4F,0xCF,0x2F,0xAF,0x6F,0xEF,0x1F,0x9F,0x5F,0xDF,0x3F,0xBF,0x7F,0xFF,
 };
 
-//word偺夋憸僨乕僞傪悈暯曽岦偵斀揮偡傞
+//wordの画像データを水平方向に反転する
 #define horizflip(src) (tbl_bitrev[src&0xff]|(tbl_bitrev[(src>>8)&0xff]<<8))
 
 
@@ -249,7 +249,7 @@ void dattrans2n(word *pal, word *dat, dword src)
 
 #define trb(ofs,b,c) if ( (!(b))&&(c) ) *(now_pos+ofs)=*(word *)(((char *)cur_p)+(c))
 
-//screenx偺trans mask傪ztbl1偵彂偒崬傒丅priority偼true/false偱trans傪儅僗僋偟偰ztbl2偵
+//screenxのtrans maskをztbl1に書き込み。priorityはtrue/falseでtransをマスクしてztbl2に
 void set_ztbl(int screenx, byte mask, byte prio)
 {
 	// left byte right shift  (8-(screenx&7))
@@ -318,7 +318,7 @@ void lcd_bg_render(void *buf,int scanline)
 //	word *now_pat2=(word*)(vrams[0]+pat+14-((y&7)<<1));
 	dword tmp_dat;
 
-	int screenx=g_regs.SCX/8*8-g_regs.SCX;		//尰嵼偺僗僋儕乕儞忋偱偺倶嵗昗丅晧偵側傞偙偲傕偁傝丅埲壓偱偼[-7,160]傪庢傝摼傞丅
+	int screenx=g_regs.SCX/8*8-g_regs.SCX;		//現在のスクリーン上でのｘ座標。負になることもあり。以下では[-7,160]を取り得る。
 	dat+=screenx;
 
 //	for (i=0;i<20;i++){
@@ -366,7 +366,7 @@ void lcd_win_render(void *buf,int scanline)
 	word *now_pat=(word*)(vram+pat+((y&7)<<1));
 	dword tmp_dat;
 
-	int screenx=g_regs.WX-7;		//尰嵼偺僗僋儕乕儞忋偱偺倶嵗昗
+	int screenx=g_regs.WX-7;		//現在のスクリーン上でのｘ座標
 
 	for (i=g_regs.WX>>3;i<21;i++){
 		tile=*(now_tile++);
@@ -431,7 +431,7 @@ void lcd_sprite_render(void *buf,int scanline)
 		sprite_count++;
 		now_pos=sdat+x;
 
-		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 悈暯斀揮偡傞丅sprite偼GB偱傕斀揮偱偒傞偺丠 -LCK
+		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 水平反転する。spriteはGBでも反転できるの？ -LCK
 
 		byte zt=((atr&0x80)?get_ztbl1(x):0);
 		trb(0,zt&0x80,dtwk(tmp_dat>>6));
@@ -449,7 +449,7 @@ void lcd_bg_render_color(void *buf,int scanline)
 {
 	int t;
 
-	// 僇儔乕偱偼OFF婡擻偑摥偐側偄?(杔偺僉儍儞僾応們搩R儗僫僀僩)
+	// カラーではOFF機能が働かない?(僕のキャンプ場?モンコレナイト)
 	if (!(g_regs.LCDC&0x80)/*||!(g_regs.LCDC&0x01)*/||
 		(g_regs.WY<=(dword)scanline&&g_regs.WX<8&&(g_regs.LCDC&0x20))){
 		if (!(g_regs.LCDC&0x80)/*||!(g_regs.LCDC&0x01)*/){
@@ -489,7 +489,7 @@ void lcd_bg_render_color(void *buf,int scanline)
 	dword tmp_dat;
 	byte atr;
 
-	int screenx=g_regs.SCX/8*8-g_regs.SCX;		//尰嵼偺僗僋儕乕儞忋偱偺倶嵗昗丅晧偵側傞偙偲傕偁傝丅埲壓偱偼[-7,160]傪庢傝摼傞丅
+	int screenx=g_regs.SCX/8*8-g_regs.SCX;		//現在のスクリーン上でのｘ座標。負になることもあり。以下では[-7,160]を取り得る。
 	dat+=screenx;
 
 //	for (i=0;i<21;i++){
@@ -507,7 +507,7 @@ void lcd_bg_render_color(void *buf,int scanline)
 			+((atr<<9)&0x1000)		//bank
 		);
 
-		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 悈暯斀揮偡傞
+		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 水平反転する
 		dattrans2nd(pal,dat,tmp_dat);
 		set_ztbl(screenx,(tmp_dat>>8)|tmp_dat,(atr&0x80));
 		screenx+=8;
@@ -520,7 +520,7 @@ void lcd_bg_render_color(void *buf,int scanline)
 		}
 	}
 fin:
-	// 懡暘偙偆偄偆偙偲(杔偺僉儍儞僾応)
+	// 多分こういうこと(僕のキャンプ場)
 	if (!(g_regs.LCDC&0x01)) {
 		memset(ztbls,0,sizeof(ztbls));
 	}
@@ -561,7 +561,7 @@ void lcd_win_render_color(void *buf,int scanline)
 	byte atr;
 	word bank;
 
-	int screenx=g_regs.WX-7;		//尰嵼偺僗僋儕乕儞忋偱偺倶嵗昗
+	int screenx=g_regs.WX-7;		//現在のスクリーン上でのｘ座標
 
 	for (i=g_regs.WX>>3;i<21;i++){
 		tile=*(now_tile++);
@@ -570,7 +570,7 @@ void lcd_win_render_color(void *buf,int scanline)
 		pal=col_pal[atr&7];
 		tmp_dat=(tile&0x80)?*(((atr&0x40)?now_share2:now_share)+(tile<<3)+bank):*(((atr&0x40)?now_pat2:now_pat)+(tile<<3)+bank);
 
-		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 悈暯斀揮偡傞
+		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 水平反転する
 		dattrans2nd(pal,dat,tmp_dat);
 		set_ztbl(screenx,(tmp_dat>>8)|tmp_dat,(atr&0x80));
 		screenx+=8;
@@ -597,14 +597,14 @@ void lcd_sprite_render_color(void *buf,int scanline)
 	for (i=39;i>=0;i--){
 		if (sp_size){ // 8*16
 			y=oam[i*4]-1;
-			if (((y-scanline)&-16)!=0) continue;			//廲曽岦偺斖埻敾掕
+			if (((y-scanline)&-16)!=0) continue;			//縦方向の範囲判定
 		} else { // 8*8
 			y=oam[i*4]-9;
-			if (((y-scanline)&-8)!=0) continue;				//廲曽岦偺斖埻敾掕
+			if (((y-scanline)&-8)!=0) continue;				//縦方向の範囲判定
 		}
 		x=oam[i*4+1]-8;
-		if (x<=-8||x>SIZE_LINE) continue;					//墶曽岦偺斖埻敾掕
-//		if ((x==-8&&y==-16)||y>144+15) continue;			//偦偺懠偺斖埻敾掕
+		if (x<=-8||x>SIZE_LINE) continue;					//横方向の範囲判定
+//		if ((x==-8&&y==-16)||y>144+15) continue;			//その他の範囲判定
 
 		tile=oam[i*4+2];
 		atr=oam[i*4+3];
@@ -612,11 +612,11 @@ void lcd_sprite_render_color(void *buf,int scanline)
 		bank=(atr&0x08?0x2000:0);
 
 		if (sp_size){ // 8*16
-			if (scanline-y+15<8){ //忋敿暘
+			if (scanline-y+15<8){ //上半分
 				now=(atr&0x40)?((y-scanline)&7):((7-(y-scanline))&7);
 				tmp_dat=*(word*)(vram+bank+(tile&0xfe)*16+now*2+((atr&0x40)?16:0));
 			}
-			else{ // 壓敿暘
+			else{ // 下半分
 				now=(atr&0x40)?((y-scanline)&7):((7-(y-scanline))&7);
 				tmp_dat=*(word*)(vram+bank+(tile&0xfe)*16+now*2+((atr&0x40)?0:16));
 			}
@@ -626,9 +626,9 @@ void lcd_sprite_render_color(void *buf,int scanline)
 			tmp_dat=*(word*)(vram+tile*16+now*2+bank);
 		}
 		sprite_count++;
-		now_pos=sdat+x; // now_pos=尰嵼抧揰
+		now_pos=sdat+x; // now_pos=現在地点
 
-		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 悈暯斀揮偡傞
+		if (atr&0x20) tmp_dat=horizflip(tmp_dat);	// 水平反転する
 
 		byte zt=((atr&0x80)?get_ztbl1(x):get_ztbl2(x));
 		trb(0,zt&0x80,dtwk(tmp_dat>>6));

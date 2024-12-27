@@ -1,7 +1,7 @@
 #ifndef OP_DEF_
 #define OP_DEF
 
-// ƒvƒŠƒtƒBƒbƒNƒX‚È‚µZ80ƒIƒyƒR[ƒh
+// ¥×¥ê¥Õ¥£¥Ã¥¯¥¹¤Ê¤·Z80¥ª¥Ú¥³©`¥É
 
 /*
 #define REG_A c_regs.AF.b.h
@@ -20,7 +20,7 @@
 #define REG_PC c_regs.PC
 */
 
-//c_regs‚ğ\‘¢‘Ì‚¶‚á‚È‚­‚µ‚½‚Ì‚Å•ÏX
+//c_regs¤ò˜‹ÔìÌå¤¸¤ã¤Ê¤¯¤·¤¿¤Î¤Ç‰ä¸ü
 #define REG_A (((byte *)&c_regs_AF)[1])
 #define REG_F (((byte *)&c_regs_AF)[0])
 #define REG_B (((byte *)&c_regs_BC)[1])

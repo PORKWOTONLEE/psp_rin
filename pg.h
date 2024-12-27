@@ -68,7 +68,7 @@ extern u32 now_tick;
 
 //optimize
 
-//long攝楍傪僐僺乕丅攝楍嫬奅偼4僶僀僩傾儔僀儞偝傟偰偄傞昁梫偁傝
+//long配列をコピー。配列境界は4バイトアラインされている必要あり
 static inline void __memcpy4(void *d, void *s, unsigned long c)
 {
 	//for (; c>0; --c) *(((unsigned long *)d)++)=*(((unsigned long *)s)++);
@@ -77,7 +77,7 @@ static inline void __memcpy4(void *d, void *s, unsigned long c)
 }
 
 
-//long攝楍偵僙僢僩丅攝楍嫬奅偼4僶僀僩傾儔僀儞偝傟偰偄傞昁梫偁傝
+//long配列にセット。配列境界は4バイトアラインされている必要あり
 static inline void __memset4(void *d, unsigned long v, unsigned long c)
 {
 	//for (; c>0; --c) *(((unsigned long *)d)++)=v;
@@ -86,8 +86,8 @@ static inline void __memset4(void *d, unsigned long v, unsigned long c)
 }
 
 
-//long攝楍傪僐僺乕丅攝楍嫬奅偼4僶僀僩傾儔僀儞偝傟偰偄傞昁梫偁傝
-//僐儞僷僀儔偺嵟揔壔偵傛偭偰梊婜偟側偄僐乕僪偑惗惉偝傟傞偨傔丄廫暘偵拲堄偺偙偲丅
+//long配列をコピー。配列境界は4バイトアラインされている必要あり
+//コンパイラの最適化によって予期しないコードが生成されるため、十分に注意のこと。
 static inline void __memcpy4aa(void *d, void *s, unsigned long c)
 {
 	unsigned long wk0,wk1,wk2,wk3;
@@ -119,10 +119,10 @@ static inline void __memcpy4aa(void *d, void *s, unsigned long c)
 	);
 }
 
-//long攝楍傪僐僺乕丅攝楍嫬奅偼4僶僀僩傾儔僀儞偝傟偰偄傞昁梫偁傝
-//s,d偼嶲徠搉偟埖偄偵側傞偺偱丄儕僞乕儞屻偼曄峏偝傟偰偄傞偲峫偊偨傎偆偑椙偄
-//僐儞僷僀儔偺嵟揔壔偵傛偭偰梊婜偟側偄僐乕僪偑惗惉偝傟傞偨傔丄廫暘偵拲堄偺偙偲丅__memcpy4偺傎偆偑埨慡丅
-//偲偄偄傑偡偐c偱彂偄偰傕慡慠曄傢傜側偄傛偆側丅掇荻薤纻虃蓙B
+//long配列をコピー。配列境界は4バイトアラインされている必要あり
+//s,dは参照渡し扱いになるので、リターン後は変更されていると考えたほうが良い
+//コンパイラの最適化によって予期しないコードが生成されるため、十分に注意のこと。__memcpy4のほうが安全。
+//といいますかcで書いても全然変わらないような。???????のに。
 static inline void __memcpy4a(unsigned long *d, unsigned long *s, unsigned long c)
 {
 	unsigned long wk,counter;

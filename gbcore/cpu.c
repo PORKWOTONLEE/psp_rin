@@ -18,7 +18,7 @@
 */
 
 //------------------------------------------------
-// CPU 僯乕儌僯僢僋埲奜幚憰晹 (I/ORQ 摍)
+// CPU ニーモニック以外実装部 (I/O?IRQ 等)
 
 #include "gb.h"
 #include "_bit_table.h"
@@ -30,11 +30,11 @@
 
 /////////////////////////////////////////
 //
-// 儊儞僶曄悢
+// メンバ変数
 //
 /////////////////////////////////////////
 
-//struct偩偲gp憡懳偑巊偊側偄傒偨偄側偺偱丄晛捠偺曄悢偵曄峏丅娭楢偺廋惓懡傔側偺偱拲堄丅 - LCK
+//structだとgp相対が使えないみたいなので、普通の変数に変更。関連の修正多めなので注意。 - LCK
 struct cpu_regs _c_regs;
 word c_regs_AF;
 word c_regs_BC;
@@ -80,7 +80,7 @@ byte rp_data;
 
 /////////////////////////////////////////
 //
-// 儊儞僶娭悢
+// メンバ関数
 //
 /////////////////////////////////////////
 void cpu_init(void)
@@ -186,15 +186,15 @@ byte cpu_read_direct_ord(word adr)
 	switch(adr>>13){
 	case 0:
 	case 1:
-		return get_rom()[adr];//ROM椞堟
+		return get_rom()[adr];//ROM領域
 	case 2:
 	case 3:
-		return mbc_get_rom()[adr];//僶儞僋壜擻ROM
+		return mbc_get_rom()[adr];//バンク可能ROM
 	case 4:
 		return vram_bank[adr&0x1FFF];//8KBVRAM
 	case 5:
 		if (mbc_is_ext_ram())
-			return mbc_get_sram()[adr&0x1FFF];//僇乕僩儕僢僕RAM
+			return mbc_get_sram()[adr&0x1FFF];//カートリッジRAM
 		else
 			return mbc_ext_read(adr);
 	case 6:
@@ -219,7 +219,7 @@ byte cpu_read_direct_ord(word adr)
 	return 0;
 }
 
-//抁偔偟偰僀儞儔僀儞偵傇偪偙傓 - LCK
+//短くしてインラインにぶちこむ - LCK
 //inline byte cpu_read_direct(word adr)
 static inline byte cpu_read(word adr)
 {
@@ -257,7 +257,7 @@ inline byte op_read()
 	return cpu_read(c_regs_PC++);
 }
 
-//偙偭偪偺傎偆偑憗偄偲巚傢傟 - LCK
+//こっちのほうが早いと思われ - LCK
 inline word op_readw()
 {
 	word r=readw(c_regs_PC);
@@ -279,7 +279,7 @@ void cpu_write_direct_ord(word adr,byte dat)
 		break;
 	case 5:
 		if (mbc_is_ext_ram())
-			mbc_get_sram()[adr&0x1FFF]=dat;//僇乕僩儕僢僕RAM
+			mbc_get_sram()[adr&0x1FFF]=dat;//カートリッジRAM
 		else
 			mbc_ext_write(adr,dat);
 		break;
@@ -306,7 +306,7 @@ void cpu_write_direct_ord(word adr,byte dat)
 	}
 }
 
-//抁偔偟偰僀儞儔僀儞偵傇偪偙傓 - LCK
+//短くしてインラインにぶちこむ - LCK
 inline void cpu_write_direct(word adr,byte dat)
 {
 	if ((adr&0xe000)==0xc000) {
@@ -316,7 +316,7 @@ inline void cpu_write_direct(word adr,byte dat)
 			ram[adr&0x0fff]=dat;
 	} else if ((adr&0xe000)==0xa000) {
 		if (mbc_is_ext_ram())
-			mbc_get_sram()[adr&0x1FFF]=dat;//僇乕僩儕僢僕RAM
+			mbc_get_sram()[adr&0x1FFF]=dat;//カートリッジRAM
 		else
 			mbc_ext_write(adr,dat);
 	} else {
@@ -459,7 +459,7 @@ static const byte ZTable[256] =
 
 
 //#define Z_FLAG 0x40
-//d==0偺帪偵0x40傪曉偡丅偦傟埲奜偼侽傪曉偡丅
+//d==0の時に0x40を返す。それ以外は０を返す。
 static inline byte GenZF(byte d)
 {
 	byte ret;
@@ -500,13 +500,13 @@ void cpu_irq(int irq_type)
 	cpu_irq_check();
 }
 
-//g_regs.IF, g_regs.IE, c_regs_I, halt, int_disable_next 偑曄峏偝傟偨帪偵屇傇偙偲丅偙傟偱僼儔僌傪偮偔偭偰丄儊僀儞儖乕僾偱尒傞 - LCK
+//g_regs.IF, g_regs.IE, c_regs_I, halt, int_disable_next が変更された時に呼ぶこと。これでフラグをつくって、メインループで見る - LCK
 void cpu_irq_check()
 {
-	int_invoke_next=(((g_regs.IF&g_regs.IE)&&(c_regs_I||halt)) || int_disable_next);	//妱傝偙傒偑偐偐傞帪+disable_next
+	int_invoke_next=(((g_regs.IF&g_regs.IE)&&(c_regs_I||halt)) || int_disable_next);	//割りこみがかかる時+disable_next
 }
 
-//妱傝崬傒偑偐偐偭偨傜愊嶼clock傕偄偠傞傛偆偵曄峏
+//割り込みがかかったら積算clockもいじるように変更
 void cpu_irq_process()
 {
 	if (int_disable_next){
@@ -560,9 +560,9 @@ void cpu_irq_process()
 
 	cpu_irq_check();
 	
-	//妱傝崬傒偑偐偐偭偨偺偱僗僥乕僩傪懌偡
-	//13state偼巄掕抣丅GB偱偳偆側偭偰傞偐偼抦傜側偄丅
-	//傛偔傢偐傜傫偺偱sys_clock偼懌偟偰側偄偑擖傟偰傕偄偄偐傕 - LCK
+	//割り込みがかかったのでステートを足す
+	//13stateは暫定値。GBでどうなってるかは知らない。
+	//よくわからんのでsys_clockは足してないが入れてもいいかも - LCK
 //	rest_clock-=13;
 //	div_clock+=13;
 //	total_clock+=13;
@@ -613,7 +613,7 @@ void cpu_exec(int clocks)
 		div_clock+=tmp_clocks;
 		total_clock+=tmp_clocks;
 
-		if (g_regs.TAC&0x04){//僞僀儅妱傝偙傒
+		if (g_regs.TAC&0x04){//タイマ割りこみ
 			sys_clock+=tmp_clocks;
 			if (sys_clock>timer_clocks[g_regs.TAC&0x03]){
 				sys_clock&=timer_clocks[g_regs.TAC&0x03]-1;
@@ -638,7 +638,7 @@ void cpu_exec(int clocks)
 				g_regs.SC&=3;
 			}
 			else*/{
-				if (hook_ext){ // 僼僢僋偟傑偡
+				if (hook_ext){ // フックします
 					byte ret=hook_proc.send(g_regs.SB);
 					g_regs.SB=ret;
 					g_regs.SC&=3;

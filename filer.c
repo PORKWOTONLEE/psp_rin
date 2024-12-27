@@ -12,7 +12,7 @@ SceIoDirent *zip_sortfiles[MAX_ENTRY];
 int zip_nfiles;
 char path_inzip[MAX_PATH]={0};
 
-// 奼挘巕娗棟梡
+// 拡張子管理用
 const struct {
 	char *szExt;
 	int nExtId;
@@ -41,16 +41,16 @@ int getExtId(const char *szFilePath) {
 	return EXT_UNKNOWN;
 }
 
-// Unzip 懳墳 by ruka
+// Unzip 対応 by ruka
 
-// 僐乕儖僶僢僋庴偗搉偟梡
+// コールバック受け渡し用
 typedef struct {
 	byte *p_rom_image;			// pointer to rom image
 	long rom_size;				// rom size
 	char szFileName[MAX_PATH];	// extracted file name
 }ROM_INFO, *LPROM_INFO;
 
-// 偣偭偐偔側偺偱僾儘僌儗僗偱傕弌偟偰傒傑偡
+// せっかくなのでプログレスでも出してみます
 void draw_load_rom_progress(unsigned long ulExtractSize, unsigned long ulCurrentPosition)
 {
 	int nPer = 100 * ulExtractSize / ulCurrentPosition;
@@ -63,19 +63,19 @@ void draw_load_rom_progress(unsigned long ulExtractSize, unsigned long ulCurrent
 		pgBitBlt(0,0,480,272,1,bgBitmap);
 	else
 		pgFillvram(setting.color[0]);
-	// 僾儘僌儗僗
+	// プログレス
 	pgDrawFrame(89,121,391,141,setting.color[1]);
 	pgFillBox(90,123, 90+nPer*3, 139,setting.color[1]);
-	// 亾
+	// ％
 	char szPer[16];
 	sprintf(szPer,"%d%%",nPer);
 	pgPrint(28,16,setting.color[3],szPer);
-	// pgScreenFlipV()傪巊偆偲pgWaitV偑屇偽傟偰偟傑偆偺偱偙偪傜偱丅
-	// 僾儘僌儗僗偩偐傜偪傜偮偄偰傕椙偄傛偹乣
+	// pgScreenFlipV()を使うとpgWaitVが呼ばれてしまうのでこちらで。
+	// プログレスだからちらついても良いよね～
 	pgScreenFlip();
 }
 
-// Unzip 僐乕儖僶僢僋
+// Unzip コールバック
 int funcUnzipCallback(int nCallbackId, unsigned long ulExtractSize, unsigned long ulCurrentPosition,
                       const void *pData, unsigned long ulDataSize, unsigned long ulUserData)
 {
@@ -92,9 +92,9 @@ int funcUnzipCallback(int nCallbackId, unsigned long ulExtractSize, unsigned lon
 			break;
 		
 		nExtId = getExtId(pszFileName);
-		// 奼挘巕偑GB丒GBC丒SGB側傜揥奐
+		// 拡張子がGB?GBC?SGBなら展開
 		if (nExtId == EXT_GB) {
-			// 揥奐偡傞柤慜丄rom size傪妎偊偰偍偔
+			// 展開する名前、rom sizeを覚えておく
 			strcpy(pRomInfo->szFileName, pszFileName);
 			pRomInfo->rom_size = ulExtractSize;
 			return UZCBR_OK;
@@ -102,7 +102,7 @@ int funcUnzipCallback(int nCallbackId, unsigned long ulExtractSize, unsigned lon
         break;
     case UZCB_EXTRACT_PROGRESS:
 		pbData = (const unsigned char *)pData;
-		// 揥奐偝傟偨僨乕僞傪奿擺偟傛偆
+		// 展開されたデータを格納しよう
 		memcpy(pRomInfo->p_rom_image + ulCurrentPosition, pbData, ulDataSize);
 		draw_load_rom_progress(ulCurrentPosition + ulDataSize, ulExtractSize);
 		return UZCBR_OK;
@@ -170,13 +170,13 @@ long load_rom(const char *szRomPath)
 		stRomInfo.p_rom_image = rom_image;
 		stRomInfo.rom_size = 0;
 		memset(stRomInfo.szFileName, 0x00, sizeof(stRomInfo.szFileName));
-		// Unzip僐乕儖僶僢僋僙僢僩
+		// Unzipコールバックセット
 		Unzip_setCallback(funcUnzipCallback);
-		// Unzip揥奐偡傞
+		// Unzip展開する
 	    nRet = Unzip_execExtract(szRomPath, (unsigned long)&stRomInfo);
 		if (nRet != UZEXR_OK) {
-			// 撉傒崬傒幐攕両 - 偙偺僐乕僪偱偼丄UZEXR_CANCEL傕偙偙偵棃偰
-			// 偟傑偆偑僐乕儖僶僢僋偱僉儍儞僙儖偟偰側偄偺偱柍帇
+			// 読み込み失敗！ - このコードでは、UZEXR_CANCELもここに来て
+			// しまうがコールバックでキャンセルしてないので無視
 			lReadSize = 0;
 			pgFillvram(RGB(255,0,0));
 			mh_print(0,0,"Unzip fatal error.",0xFFFF);
@@ -200,7 +200,7 @@ long load_rom(const char *szRomPath)
 }
 
 ////////////////////////////////////////////////////////////////////////
-// 僋僀僢僋僜乕僩
+// クイックソート
 // AC add start
 void SJISCopy(SceIoDirent *a, unsigned char *file)
 {
@@ -521,11 +521,11 @@ int getFilePath(char *fullpath, u32 ext)
 		
 		if(inzip){
 			sprintf(tmp,"%s:/%s",strrchr(path,'/')+1,path_inzip);
-			rin_frame(tmp,"仜丗OK  亊丗Cancel  仮丗UP");
+			rin_frame(tmp,"○：OK  ×：Cancel  △：UP");
 		}else
-			rin_frame(filer_msg[0]?filer_msg:path,"仜丗OK  亊丗Cancel  仮丗UP   SELECT丗Remove");
+			rin_frame(filer_msg[0]?filer_msg:path,"○：OK  ×：Cancel  △：UP   SELECT：Remove");
 		
-		// 僗僋儘乕儖僶乕
+		// スクロールバー
 		if(nfiles > rows){
 			h = 219;
 			pgDrawFrame(445,25,446,248,setting.color[1]);

@@ -9,7 +9,7 @@ extern char filer_msg[256];
 long load_rom(const char *szRomPath);
 int getFilePath(char *fullpath, u32 ext);
 
-// —LŒø‚ÈŠg’£q
+// ÓĞ„¿¤Ê’ˆˆ×Ó
 enum {
 	EXT_GB = 1,
 	EXT_GZ = 2,

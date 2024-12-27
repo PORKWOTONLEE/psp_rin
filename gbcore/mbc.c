@@ -18,7 +18,7 @@
 */
 
 //---------------------------------------
-// MBC 僄儈儏儗乕僔儑儞晹 (MBC1/2/3/5/7,HuC-1,MMM01,Rumble,RTC,Motion-Sensor,etc...)
+// MBC エミュレーション部 (MBC1/2/3/5/7,HuC-1,MMM01,Rumble,RTC,Motion-Sensor,etc...)
 
 #include "gb.h"
 
@@ -230,7 +230,7 @@ byte mbc_ext_read(word adr)
 	case 0x1D:
 	case 0x1E:
 		return 0;
-	case 0x22: // 僐儘僐儘僇乕價傿
+	case 0x22: // コロコロカービィ
 		switch(adr&0xa0f0)
 		{
 		case 0xA000:
@@ -269,8 +269,8 @@ byte mbc_ext_read(word adr)
 
 void mbc_ext_write(word adr,byte dat)
 {
-	//char op_name[][20]={"僾儕僼傿僢僋僗","彂崬傒","撉崬傒","徚嫀"};
-	//char pre_op_name[][20]={"彂崬傒徚嫀嬛巭","慡傾僪儗僗彂崬傒","慡傾僪儗僗徚嫀","彂崬傒徚嫀嫋壜"};
+	//char op_name[][20]={"プリフィックス","書込み","読込み","消去"};
+	//char pre_op_name[][20]={"書込み消去禁止","全アドレス書込み","全アドレス消去","書込み消去許可"};
 	int i;
 
 	switch(rom_get_info()->cart_type){
@@ -302,7 +302,7 @@ void mbc_ext_write(word adr,byte dat)
 //		extern FILE *file;
 //		fprintf(file,"%04X : TAMA5 ext_write %04X <= %02X\n",ref_gb->get_cpu()->get_regs()->PC,adr,dat);
 		break;
-	case 0x22: // 僐儘僐儘僇乕價傿
+	case 0x22: // コロコロカービィ
 		if (adr==0xA080){
 			int bef_cs=mbc7_cs,bef_sk=mbc7_sk;
 
@@ -314,68 +314,68 @@ void mbc_ext_write(word adr,byte dat)
 					if (mbc7_write_enable){
 						*(get_sram()+mbc7_adr*2)=mbc7_buf>>8;
 						*(get_sram()+mbc7_adr*2+1)=mbc7_buf&0xff;
-//						fprintf(file,"彂偒崬傒姰椆\n");
+//						fprintf(file,"書き込み完了\n");
 					}
 					mbc7_state=0;
 					mbc7_ret=1;
-//					fprintf(file,"彂偒崬傒庴棟 僗僥乕僩:側偟\n");
+//					fprintf(file,"書き込み受理 ステート:なし\n");
 				}
 				else{
-					mbc7_idle=true; // 傾僀僪儖忬懺撍擖
+					mbc7_idle=true; // アイドル状態突入
 					mbc7_state=0;
-//					fprintf(file,"傾僀僪儖忬懺撍擖 僗僥乕僩:傾僀僪儖忬懺\n");
+//					fprintf(file,"アイドル状態突入 ステート:アイドル状態\n");
 				}
 			}
 
-			if (!bef_sk&&mbc7_sk){ // 僋儘僢僋棫偪忋偑傝
-				if (mbc7_idle){ // 傾僀僪儖忬懺偱偁傟偽
+			if (!bef_sk&&mbc7_sk){ // クロック立ち上がり
+				if (mbc7_idle){ // アイドル状態であれば
 					if (dat&0x02){
-						mbc7_idle=false; // 傾僀僪儖忬懺夝彍
+						mbc7_idle=false; // アイドル状態解除
 						mbc7_count=0;
 						mbc7_state=1;
-//						fprintf(file,"傾僀僪儖忬懺夝彍 僗僥乕僩:僐儅儞僪擣幆\n");
+//						fprintf(file,"アイドル状態解除 ステート:コマンド認識\n");
 					}
 				}
 				else{
 					switch(mbc7_state){
-					case 1: // 僐儅儞僪庴晅
+					case 1: // コマンド受付
 						mbc7_buf<<=1;
 						mbc7_buf|=(dat&0x02)?1:0;
 						mbc7_count++;
-						if (mbc7_count==2){ // 庴晅廔椆
+						if (mbc7_count==2){ // 受付終了
 							mbc7_state=2;
 							mbc7_count=0;
 							mbc7_op_code=mbc7_buf&3;
-//							fprintf(file,"僐儅儞僪:%s 僗僥乕僩:傾僪儗僗庴怣\n",op_name[mbc7_op_code]);
+//							fprintf(file,"コマンド:%s ステート:アドレス受信\n",op_name[mbc7_op_code]);
 						}
 						break;
-					case 2: // 傾僪儗僗庴怣
+					case 2: // アドレス受信
 						mbc7_buf<<=1;
 						mbc7_buf|=(dat&0x02)?1:0;
 						mbc7_count++;
-						if (mbc7_count==8){ // 庴晅廔椆
+						if (mbc7_count==8){ // 受付終了
 							mbc7_state=3;
 							mbc7_count=0;
 							mbc7_adr=mbc7_buf&0xff;
 							if (mbc7_op_code==0){
 								if ((mbc7_adr>>6)==0){
-//									fprintf(file,"彂偒崬傒徚嫀嬛巭 僗僥乕僩:側偟\n");
+//									fprintf(file,"書き込み消去禁止 ステート:なし\n");
 									mbc7_write_enable=false;
 									mbc7_state=0;
 								}
 								else if ((mbc7_adr>>6)==3){
-//									fprintf(file,"彂偒崬傒徚嫀嫋壜 僗僥乕僩:側偟\n");
+//									fprintf(file,"書き込み消去許可 ステート:なし\n");
 									mbc7_write_enable=true;
 									mbc7_state=0;
 								}
-//								fprintf(file,"僾儕僼傿僢僋僗僆儁僐乕僪:%s 僗僥乕僩:僨乕僞庴怣\n",pre_op_name[mbc7_adr>>6]);
+//								fprintf(file,"プリフィックスオペコード:%s ステート:データ受信\n",pre_op_name[mbc7_adr>>6]);
 							}
 							else{
-//								fprintf(file,"傾僪儗僗:%02X 僗僥乕僩:僨乕僞庴怣\n",mbc7_adr);
+//								fprintf(file,"アドレス:%02X ステート:データ受信\n",mbc7_adr);
 							}
 						}
 						break;
-					case 3: // 僨乕僞
+					case 3: // データ
 						mbc7_buf<<=1;
 						mbc7_buf|=(dat&0x02)?1:0;
 						mbc7_count++;
@@ -384,7 +384,7 @@ void mbc_ext_write(word adr,byte dat)
 						case 0:
 							if (mbc7_count==16){
 								if ((mbc7_adr>>6)==0){
-//									fprintf(file,"彂偒崬傒徚嫀嬛巭 僗僥乕僩:側偟\n");
+//									fprintf(file,"書き込み消去禁止 ステート:なし\n");
 									mbc7_write_enable=false;
 									mbc7_state=0;
 								}
@@ -395,7 +395,7 @@ void mbc_ext_write(word adr,byte dat)
 											*(get_sram()+i*2)=mbc7_buf&0xff;
 										}
 									}
-//									fprintf(file,"慡傾僪儗僗彂偒崬傒 %04X 僗僥乕僩:側偟\n",mbc7_buf);
+//									fprintf(file,"全アドレス書き込み %04X ステート:なし\n",mbc7_buf);
 									mbc7_state=5;
 								}
 								else if ((mbc7_adr>>6)==2){
@@ -403,11 +403,11 @@ void mbc_ext_write(word adr,byte dat)
 										for (i=0;i<256;i++)
 											*(word*)(get_sram()+i*2)=0xffff;
 									}
-//									fprintf(file,"慡傾僪儗僗徚嫀 僗僥乕僩:側偟\n");
+//									fprintf(file,"全アドレス消去 ステート:なし\n");
 									mbc7_state=5;
 								}
 								else if ((mbc7_adr>>6)==3){
-//									fprintf(file,"彂偒崬傒徚嫀嫋壜 僗僥乕僩:側偟\n");
+//									fprintf(file,"書き込み消去許可 ステート:なし\n");
 									mbc7_write_enable=true;
 									mbc7_state=0;
 								}
@@ -416,7 +416,7 @@ void mbc_ext_write(word adr,byte dat)
 							break;
 						case 1:
 							if (mbc7_count==16){
-//								fprintf(file,"彂偒崬傒 [%02X]<-%04X 僗僥乕僩:彂偒崬傒懸偪僼儗乕儉\n",mbc7_adr,mbc7_buf);
+//								fprintf(file,"書き込み [%02X]<-%04X ステート:書き込み待ちフレーム\n",mbc7_adr,mbc7_buf);
 								mbc7_count=0;
 								mbc7_state=5;
 								mbc7_ret=0;
@@ -424,16 +424,16 @@ void mbc_ext_write(word adr,byte dat)
 							break;
 						case 2:
 							if (mbc7_count==1){
-//								fprintf(file,"僟儈乕庴怣姰椆 僗僥乕僩:撉傒弌偟壜\n");
+//								fprintf(file,"ダミー受信完了 ステート:読み出し可\n");
 								mbc7_state=4;
 								mbc7_count=0;
 								mbc7_buf=(get_sram()[mbc7_adr*2]<<8)|(get_sram()[mbc7_adr*2+1]);
-//								fprintf(file,"庴怣僨乕僞 %04X\n",mbc7_buf);
+//								fprintf(file,"受信データ %04X\n",mbc7_buf);
 							}
 							break;
 						case 3:
 							if (mbc7_count==16){
-//								fprintf(file,"徚嫀 [%02X] 僗僥乕僩:彂偒崬傒懸偪僼儗乕儉\n",mbc7_adr,mbc7_buf);
+//								fprintf(file,"消去 [%02X] ステート:書き込み待ちフレーム\n",mbc7_adr,mbc7_buf);
 								mbc7_count=0;
 								mbc7_state=5;
 								mbc7_ret=0;
@@ -446,16 +446,16 @@ void mbc_ext_write(word adr,byte dat)
 				}
 			}
 
-			if (bef_sk&&!mbc7_sk){ // 僋儘僢僋棫偪壓傝
-				if (mbc7_state==4){ // 撉傒弌偟拞
+			if (bef_sk&&!mbc7_sk){ // クロック立ち下り
+				if (mbc7_state==4){ // 読み出し中
 					mbc7_ret=(mbc7_buf&0x8000)?1:0;
 					mbc7_buf<<=1;
 					mbc7_count++;
-//					fprintf(file,"撉傒弌偟拞 %d 價僢僩栚\n",mbc7_count);
+//					fprintf(file,"読み出し中 %d ビット目\n",mbc7_count);
 					if (mbc7_count==16){
 						mbc7_count=0;
 						mbc7_state=0;
-//						fprintf(file,"撉傒弌偟姰椆 僗僥乕僩:側偟\n");
+//						fprintf(file,"読み出し完了 ステート:なし\n");
 					}
 				}
 			}
@@ -558,7 +558,7 @@ void mbc_nop(word adr,byte dat)
 
 void mbc_mbc1_write(word adr,byte dat)
 {
-	if (mbc1_16_8){//16/8儌乕僪
+	if (mbc1_16_8){//16/8モード
 		switch(adr>>13){
 		case 0:
 			break;
@@ -579,7 +579,7 @@ void mbc_mbc1_write(word adr,byte dat)
 			break;
 		}
 	}
-	else{//4/32儌乕僪
+	else{//4/32モード
 		switch(adr>>13){
 		case 0:
 			break;
@@ -630,11 +630,11 @@ void mbc_mbc3_write(word adr,byte dat)
 			mbc3_timer=dat&0x0F;
 		}
 		break;
-	case 3://RTC儔僢僠
-		if (dat==0){ // Latch偼偢偡
+	case 3://RTCラッチ
+		if (dat==0){ // Latchはずす
 			mbc3_latch=0;
 		}
-		else if (dat==1){ // 僨乕僞傪Latch偡傞
+		else if (dat==1){ // データをLatchする
 			if (!mbc3_latch){
 				mbc3_sec=renderer_get_time(8);
 				mbc3_min=renderer_get_time(9);
@@ -667,7 +667,7 @@ void mbc_mbc5_write(word adr,byte dat)
 		break;
 	case 4:
 	case 5:
-		if (rom_get_info()->cart_type==0x1C||rom_get_info()->cart_type==0x1D||rom_get_info()->cart_type==0x1E){//Rumble 僇乕僩儕僢僕
+		if (rom_get_info()->cart_type==0x1C||rom_get_info()->cart_type==0x1D||rom_get_info()->cart_type==0x1E){//Rumble カートリッジ
 			sram_page=get_sram()+0x2000*(dat&0x07&(ram_size_tbl[rom_get_info()->ram_size]-1));
 			if (dat&0x8)
 				renderer_set_bibrate(true);
@@ -697,14 +697,14 @@ void mbc_mbc7_write(word adr,byte dat)
 		else
 			ext_is_ram=false;
 		break;
-	case 3: // 0x40 偑 儌乕僔儑儞僙儞僒乕偵儅僢僾偩偑紓虃鄠虃獌}僢僾偝傟傞偙偲偼柍偄丅
+	case 3: // 0x40 が モーションセンサーにマップだが?他のものがマップされることは無い。
 		break;
 	}
 }
 
 void mbc_huc1_write(word adr,byte dat)
 {
-	if (huc1_16_8){//16/8儌乕僪
+	if (huc1_16_8){//16/8モード
 		switch(adr>>13){
 		case 0:
 			break;
@@ -725,7 +725,7 @@ void mbc_huc1_write(word adr,byte dat)
 			break;
 		}
 	}
-	else{//4/32儌乕僪
+	else{//4/32モード
 		switch(adr>>13){
 		case 0:
 			break;
@@ -780,11 +780,11 @@ void mbc_huc3_write(word adr,byte dat)
 //			mbc3_timer=dat&0x0F;
 		}
 		break;
-	case 3://RTC儔僢僠
-/*		if (dat==0){ // Latch偼偢偡
+	case 3://RTCラッチ
+/*		if (dat==0){ // Latchはずす
 			mbc3_latch=0;
 		}
-		else if (dat==1){ // 僨乕僞傪Latch偡傞
+		else if (dat==1){ // データをLatchする
 			if (!mbc3_latch){
 				mbc3_sec=renderer_get_time(8);
 				mbc3_min=renderer_get_time(9);
@@ -807,7 +807,7 @@ void mbc_tama5_write(word adr,byte dat)
 
 void mbc_mmm01_write(word adr,byte dat)
 {
-	if (mbc1_16_8){//16/8儌乕僪
+	if (mbc1_16_8){//16/8モード
 		switch(adr>>13){
 		case 0:
 			break;
@@ -828,7 +828,7 @@ void mbc_mmm01_write(word adr,byte dat)
 			break;
 		}
 	}
-	else{//4/32儌乕僪
+	else{//4/32モード
 		switch(adr>>13){
 		case 0:
 			break;
@@ -852,7 +852,7 @@ void mbc_mmm01_write(word adr,byte dat)
 	}
 }
 
-//偙偺傊傫僀儞儔僀儞壔
+//このへんインライン化
 /*
 byte *mbc_get_rom()
 {

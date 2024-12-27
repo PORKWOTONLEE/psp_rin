@@ -43,7 +43,7 @@ void pgWaitV()
 char *pgGetVramAddr(unsigned long x,unsigned long y)
 {
 	return pg_vramtop+(pg_drawframe?FRAMESIZE:0)+x*PIXELSIZE*2+y*LINESIZE*2+0x40000000;
-//	return pg_vramtop+(pg_drawframe?FRAMESIZE:0)+x*PIXELSIZE*2+y*LINESIZE*2;//+0x40000000;	//曄傢傜側偄傜偟偄
+//	return pg_vramtop+(pg_drawframe?FRAMESIZE:0)+x*PIXELSIZE*2+y*LINESIZE*2;//+0x40000000;	//???????炵??
 }
 
 void pgPrint_drawbg(unsigned long x, unsigned long y, unsigned long color, unsigned long bgcolor, const char *str)
@@ -203,7 +203,7 @@ void pgBitBltSgb(unsigned long x,unsigned long y,unsigned long *d)
 	}
 }
 
-//偪傚偄憗偄x1 - LCK
+//ちょい早いx1 - LCK
 void pgBitBltN1(unsigned long x,unsigned long y,unsigned long *d)
 {
 	unsigned long *v0;		//pointer to vram
@@ -220,7 +220,7 @@ void pgBitBltN1(unsigned long x,unsigned long y,unsigned long *d)
 	}
 }
 
-//偁傫傑傝曄傢傜側偄x1.5 -LCK
+//あんまり変わらないx1.5 -LCK
 void pgBitBltN15(unsigned long x,unsigned long y,unsigned long *d)
 {
 	unsigned short *vptr0;		//pointer to vram
@@ -259,7 +259,7 @@ void pgBitBltN15(unsigned long x,unsigned long y,unsigned long *d)
 	}
 }
 
-//傛偔傢偐傫側偄x2 - LCK
+//よくわかんないx2 - LCK
 void pgBitBltN2(unsigned long x,unsigned long y,unsigned long h,unsigned long *d)
 {
 	unsigned long *v0;		//pointer to vram
@@ -601,7 +601,7 @@ void Draw_Char_Hankaku(int x,int y,const unsigned char c,int col) {
 
 // by kwn
 void Draw_Char_Zenkaku(int x,int y,const unsigned char u,unsigned char d,int col) {
-	// ELISA100.FNT偵懚嵼偟側偄暥帤
+	// ELISA100.FNTに存在しない文字
 	const unsigned short font404[] = {
 		0xA2AF, 11,
 		0xA2C2, 8,
@@ -632,11 +632,11 @@ void Draw_Char_Zenkaku(int x,int y,const unsigned char u,unsigned char d,int col
 	unsigned short code;
 	int i;
 
-	// SJIS僐乕僪偺惗惉
+	// SJISコードの生成
 	code = u;
 	code = (code<<8) + d;
 
-	// SJIS偐傜EUC偵曄姺
+	// SJISからEUCに変換
 	if(code >= 0xE000) code-=0x4000;
 	code = ((((code>>8)&0xFF)-0x81)<<9) + (code&0x00FF);
 	if((code & 0x00FF) >= 0x80) code--;
@@ -644,7 +644,7 @@ void Draw_Char_Zenkaku(int x,int y,const unsigned char u,unsigned char d,int col
 	else code-=0x40;
 	code += 0x2121 + 0x8080;
 
-	// EUC偐傜宐棞嵐僼僅儞僩偺斣崋傪惗惉
+	// EUCから恵梨沙フォントの番号を生成
 	n = (((code>>8)&0xFF)-0xA1)*(0xFF-0xA1)
 		+ (code&0xFF)-0xA1;
 	i=0;
@@ -989,10 +989,10 @@ int pgaOutBlocking(unsigned long channel,unsigned long vol1,unsigned long vol2,v
 	return sceAudioOutputPannedBlocking(pga_handle[channel],vol1,vol2,buf);
 }
 
-//僶僢僼傽偼64僶僀僩嫬奅偠傖側偔偰傕戝忎晇傒偨偄
-//[0]偑嵍丄[1]偑塃
-//僒儞僾儖懍搙偼44100
-//vol1偑嵍
+//バッファは64バイト境界じゃなくても大丈夫みたい
+//[0]が左、[1]が右
+//サンプル速度は44100
+//vol1が左
 
 /******************************************************************************/
 #ifdef USE_GPU

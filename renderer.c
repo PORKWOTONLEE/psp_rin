@@ -172,7 +172,7 @@ void render_screen(void *buf)
 	}
 }
 
-//係僶儞僋偵暘偗偰丄尰嵼弌椡拞偠傖側偄僶儞僋偵彂偄偰偄偔 - LCK
+//４バンクに分けて、現在出力中じゃないバンクに書いていく - LCK
 void renderer_update_sound()
 {
 	int sound_buf_len = 768 + 256 * setting.sound_buffer;
@@ -368,7 +368,7 @@ void renderer_update_pad()
 		}
 	}
 	rapid_state = (rapid_state + 1) % 4;
-	// 儌乕僔儑儞僙儞僒乕
+	// モーションセンサー
 	now_sensor_x=2047-paddata.analog[CTRL_ANALOG_X]+127;
 	now_sensor_y=2047-paddata.analog[CTRL_ANALOG_Y]+127;
 }
@@ -399,15 +399,15 @@ byte renderer_get_time(int type)
 	unsigned long now=time(NULL)-cur_time;
 
 	switch(type){
-	case 8: // 昩
+	case 8: // 秒
 		return (byte)(now%60);
-	case 9: // 暘
+	case 9: // 分
 		return (byte)((now/60)%60);
-	case 10: // 帪
+	case 10: // 時
 		return (byte)((now/(60*60))%24);
-	case 11: // 擔(L)
+	case 11: // 日(L)
 		return (byte)((now/(24*60*60))&0xff);
-	case 12: // 擔(H)
+	case 12: // 日(H)
 		return (byte)((now/(256*24*60*60))&1);
 	}
 	return 0;
@@ -419,19 +419,19 @@ void renderer_set_time(int type,byte dat)
 	unsigned long adj=now-cur_time;
 
 	switch(type){
-	case 8: // 昩
+	case 8: // 秒
 		adj=(adj/60)*60+(dat%60);
 		break;
-	case 9: // 暘
+	case 9: // 分
 		adj=(adj/(60*60))*60*60+(dat%60)*60+(adj%60);
 		break;
-	case 10: // 帪
+	case 10: // 時
 		adj=(adj/(24*60*60))*24*60*60+(dat%24)*60*60+(adj%(60*60));
 		break;
-	case 11: // 擔(L)
+	case 11: // 日(L)
 		adj=(adj/(256*24*60*60))*256*24*60*60+(dat*24*60*60)+(adj%(24*60*60));
 		break;
-	case 12: // 擔(H)
+	case 12: // 日(H)
 		adj=(dat&1)*256*24*60*60+(adj%(256*24*60*60));
 		break;
 	}

@@ -27,16 +27,16 @@ typedef struct
 	u8 thumb;
 	u8 quickslot;
 	u8 screensize;
-	u8 bScreenSizes[16]; //余分に確保
+	u8 bScreenSizes[16]; //ﾓ犢ﾖ､ﾋｴ_ｱ｣
 	u8 gb_type;
 	u8 gb_palette;
-	u8 bGB_Pals[32]; //余分に確保
+	u8 bGB_Pals[32]; //ﾓ犢ﾖ､ﾋｴ_ｱ｣
 	u8 frameskip;
 	u8 vsync;
 	u8 sound;
 	u8 sound_buffer;
 	u8 cpu_clock;
-	S_BUTTON skeys[32]; //余分に確保
+	S_BUTTON skeys[32]; //ﾓ犢ﾖ､ﾋｴ_ｱ｣
 	u8 analog2dpad;
 	unsigned long color[4];
 	u8 bgbright;
