@@ -9,7 +9,6 @@
 #include "gbcore/gb.h"
 
 #include "font.c"
-#include "fontNaga10.c"
 #include "rewind.h"
 
 static unsigned int *GEcmd = (unsigned int *)0x441CC000;
@@ -564,7 +563,7 @@ void pgScreenFlipV()
 }
 
 // by kwn
-void Draw_Char_Hankaku(int x,int y,const unsigned char c,int col) {
+void Draw_Char_Half_Width(int x,int y,const unsigned char c,int col) {
 	unsigned short *vr;
 	unsigned char  *fnt;
 	unsigned char  pt;
@@ -583,7 +582,7 @@ void Draw_Char_Hankaku(int x,int y,const unsigned char c,int col) {
 	else
 		ch -= 0x40;
 
-	fnt = (unsigned char *)&hankaku_font10[ch*10];
+	fnt = (unsigned char *)&half_width_ascii_10[ch*10];
 
 	// draw
 	vr = (unsigned short *)pgGetVramAddr(x,y);
@@ -600,66 +599,36 @@ void Draw_Char_Hankaku(int x,int y,const unsigned char c,int col) {
 }
 
 // by kwn
-void Draw_Char_Zenkaku(int x,int y,const unsigned char u,unsigned char d,int col) {
-	// ELISA100.FNTに存在しない文字
-	const unsigned short font404[] = {
-		0xA2AF, 11,
-		0xA2C2, 8,
-		0xA2D1, 11,
-		0xA2EB, 7,
-		0xA2FA, 4,
-		0xA3A1, 15,
-		0xA3BA, 7,
-		0xA3DB, 6,
-		0xA3FB, 4,
-		0xA4F4, 11,
-		0xA5F7, 8,
-		0xA6B9, 8,
-		0xA6D9, 38,
-		0xA7C2, 15,
-		0xA7F2, 13,
-		0xA8C1, 720,
-		0xCFD4, 43,
-		0xF4A5, 1030,
-		0,0
-	};
+void Draw_Char_Full_Width(int x,int y,const unsigned char u,const unsigned char d,int col) {
 	unsigned short *vr;
 	unsigned short *fnt;
 	unsigned short pt;
 	int x1,y1;
 
 	unsigned long n;
-	unsigned short code;
-	int i;
 
-	// SJISコードの生成
-	code = u;
-	code = (code<<8) + d;
-
-	// SJISからEUCに変換
-	if(code >= 0xE000) code-=0x4000;
-	code = ((((code>>8)&0xFF)-0x81)<<9) + (code&0x00FF);
-	if((code & 0x00FF) >= 0x80) code--;
-	if((code & 0x00FF) >= 0x9E) code+=0x62;
-	else code-=0x40;
-	code += 0x2121 + 0x8080;
-
-	// EUCから恵梨沙フォントの番号を生成
-	n = (((code>>8)&0xFF)-0xA1)*(0xFF-0xA1)
-		+ (code&0xFF)-0xA1;
-	i=0;
-	while(font404[i]) {
-		if(code >= font404[i]) {
-			if(code <= font404[i]+font404[i+1]-1) {
-				n = -1;
-				break;
-			} else {
-				n-=font404[i+1];
-			}
-		}
-		i+=2;
+	// gbk/2
+	if (u>=0XB0 && d>=0xA1 && u<=0xF7 && d<=0xFE) {
+		n = (u-0xB0)*190+(d-0xA1) + 9027 - 1;
 	}
-	fnt = (unsigned short *)&zenkaku_font10[n*10];
+	// gbk/3
+	if (u>=0X81 && d>=0x40 && u<=0xA0 && d<=0xFE) {
+		n = (u-0x81)*190+(d-0x40) - 1;
+	}
+	// gbk/4
+	if (u>=0XAA && d>=0x40 && u<=0xFE && d<=0xA0) {
+		n = (u-0xAA)*190+(d-0x40) + 7791 - 1;
+	}
+	// gbk/1
+	if (u>=0XA1 && d>=0xA1 && u<=0xA9 && d<=0xFE) {
+		n = (u-0xA1)*190+(d-0xA1) + 6177 - 1;
+	}
+	// gbk/5
+	if (u>=0XA8 && d>=0x40 && u<=0xA9 && d<=0xA0) {
+		n = (u-0xA8)*190+(d-0x40) + 7411 - 1;
+	}
+
+	fnt = (unsigned short *)&full_width_gbk_10[n*10];
 
 	// draw
 	vr = (unsigned short *)pgGetVramAddr(x,y);
@@ -675,29 +644,46 @@ void Draw_Char_Zenkaku(int x,int y,const unsigned char u,unsigned char d,int col
 	}
 }
 
-// by kwn
-void mh_print(int x,int y,const char *msg,int col) {
-	int xx = x;
-	unsigned char ch = 0,bef = 0, *str=(unsigned char*)msg;
+void mn_printf(int x,int y,int col,const char *str,...) {
+	va_list ap;
+	char szBuf[512];
 
-	while(*str != 0) {
-		ch = *str++;
-		if (bef!=0) {
-			Draw_Char_Zenkaku(x,y,bef,ch,col);
-			x+=10;
-			bef=0;
-		} else {
-			if (((ch>=0x80) && (ch<0xa0)) || (ch>=0xe0)) {
-				bef = ch;
-			} else {
-				if (ch=='\n'){
-					x=xx;
-					y+=10;
-				}else{
-					Draw_Char_Hankaku(x,y,ch,col);
-					x+=5;
-				}
+	va_start(ap, str);
+	vsprintf(szBuf, str, ap);
+	va_end(ap);
+
+	core_print(x,y,col,szBuf);
+}
+
+// by kwn
+void core_print(int x,int y,int col,const char *msg) {
+	int xx = x;
+	char ch = 0, nch = 0, *gbk_ch = (char*)msg;
+
+	while(*gbk_ch != 0) {
+		ch = *gbk_ch++;
+		if (0x00<=ch && ch<=0x80)
+		{
+			if (ch == '\n')
+			{
+				x = xx;
+				y += 10;
 			}
+			else
+			{
+				Draw_Char_Half_Width(x, y, ch, col);
+				x += 5;
+			}
+		}
+		else
+		{
+			nch = *gbk_ch++;
+
+			ch = ch&0xFF;
+			nch = nch&0xFF;
+
+			Draw_Char_Full_Width(x,y,ch,nch,col);
+			x+=10;
 		}
 		if (x>=480) break;
 	}

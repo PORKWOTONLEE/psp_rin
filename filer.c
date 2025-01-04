@@ -109,7 +109,7 @@ int funcUnzipCallback(int nCallbackId, unsigned long ulExtractSize, unsigned lon
         break;
     default: // unknown...
 		pgFillvram(RGB(255,0,0));
-		mh_print(0,0,"Unzip fatal error.",0xFFFF);
+		mn_printf(0,0,0xFFFF,"Unzip fatal error.");
 		pgScreenFlipV();
         break;
     }
@@ -179,7 +179,7 @@ long load_rom(const char *szRomPath)
 			// §∑§ﬁ§¶§¨•≥©`•Î•–•√•Ø§«•≠•„•Û•ª•Î§∑§∆§ §§§Œ§«üo“ï
 			lReadSize = 0;
 			pgFillvram(RGB(255,0,0));
-			mh_print(0,0,"Unzip fatal error.",0xFFFF);
+			mn_printf(0,0,0xFFFF,"Unzip fatal error.");
 			pgScreenFlipV();
 		}
 		lReadSize = stRomInfo.rom_size;
@@ -320,7 +320,7 @@ int getZipDirCallback(int nCallbackId, unsigned long ulExtractSize, unsigned lon
 		break;
 	default: // unknown...
 		pgFillvram(RGB(255,0,0));
-		mh_print(0,0,"Unzip fatal error.",0xFFFF);
+		mn_printf(0,0,0xFFFF,"Unzip fatal error.");
 		pgScreenFlipV();
         break;
     }
@@ -536,7 +536,7 @@ int getFilePath(char *fullpath, u32 ext)
 		x=28; y=32;
 		for(i=0; i<rows; i++){
 			if(top+i >= nfiles) break;
-			mh_print(x, y, sortfiles[top+i]->d_name, setting.color[top+i==sel?2:3]);
+			mn_printf(x, y, setting.color[top+i==sel?2:3], sortfiles[top+i]->d_name);
 			y+=10;
 		}
 		

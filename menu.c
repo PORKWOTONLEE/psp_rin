@@ -231,15 +231,15 @@ void rin_frame(const char *msg0, const char *msg1)
 
 	// ¥Ð©`¥¸¥ç¥ó¥Ê¥ó¥Ð©`
 	sprintf(tmp, "¡ö £Ò£É£Î Ver%s ¡ö", VERRIN);
-	mh_print(465-strlen(tmp)*5, 0, tmp, setting.color[1]);
+	mn_printf(465-strlen(tmp)*5, 0, setting.color[1], tmp);
 
 	// ¥á¥Ã¥»©`¥¸¤Ê¤É
-	if(msg0) mh_print(17, 14, msg0, setting.color[2]);
+	if(msg0) mn_printf(17, 14, setting.color[2], msg0);
 	pgDrawFrame(17,25,463,248,setting.color[1]);
 	pgDrawFrame(18,26,462,247,setting.color[1]);
 
 	// ²Ù×÷ÕhÃ÷
-	if(msg1) mh_print(17, 252, msg1, setting.color[2]);
+	if(msg1) mn_printf(17, 252, setting.color[2], msg1);
 
 	// ¥Ð¥Ã¥Æ¥ê©`¥é¥¤¥Õ
 	if(scePowerIsBatteryExist()){
@@ -249,7 +249,7 @@ void rin_frame(const char *msg0, const char *msg1)
 			if(time >= 0)
 				sprintf(&tmp[strlen(tmp)-1],"(%d:%02d)]",time/60,time%60);
 		}
-		mh_print(465-strlen(tmp)*5, 252, tmp, setting.color[2]);
+		mn_printf(465-strlen(tmp)*5, 252, setting.color[2], tmp);
 	}
 }
 
@@ -266,7 +266,7 @@ int rin_MessageBox(const char *msg, int type){
 			rin_frame(0,"¡ð£ºOK  ¡Á£ºCancel");
 		else
 			rin_frame(0,"¡ð£ºOK");
-		mh_print(28,32,msg,setting.color[3]);
+		mn_printf(28,32,setting.color[3],msg);
 		pgScreenFlipV();
 	}
 }
@@ -1155,9 +1155,9 @@ void select_cheat(void)
 		x=30; y=32;
 		for (i=0; i<rows; i++){
 			if (top+i >= nCheats) break;
-			mh_print(x, y, cheats[top+i].name, setting.color[top+i==sel?2:3]);
+			mn_printf(x, y, setting.color[top+i==sel?2:3], cheats[top+i].name);
 			if (cheats[top+i].enable)
-				mh_print(x-6, y, "*", setting.color[3]);
+				mn_printf(x-6, y, setting.color[3], "*");
 			y+=10;
 		}
 

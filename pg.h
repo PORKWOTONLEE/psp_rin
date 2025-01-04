@@ -53,7 +53,8 @@ void pgBitBltSgb(unsigned long x,unsigned long y,unsigned long *d);
 void pgPutChar(unsigned long x,unsigned long y,unsigned long color,unsigned long bgcolor,unsigned char ch,char drawfg,char drawbg,char mag);
 void pgDrawFrame(unsigned long x1, unsigned long y1, unsigned long x2, unsigned long y2, unsigned long color);
 void pgFillBox(unsigned long x1, unsigned long y1, unsigned long x2, unsigned long y2, unsigned long color);
-void mh_print(int x,int y,const char *str,int col);
+void core_print(int x,int y,int col,const char *str);
+void mn_printf(int x,int y,int col,const char *str,...);
 char *pgGetVramAddr(unsigned long x,unsigned long y);
 
 void readpad(void);
