@@ -24,7 +24,7 @@ ASFLAGS	= $(CFLAGS)
 
 LIBDIR	=
 LDFLAGS	= 
-LIBS = lib/unziplib.a lib/libpng.a -lz -lpsppower -lpspaudio 
+LIBS = lib/unziplib.a lib/libpng.a -lz -lpsppower -lpspaudio -lpspkubridge
 
 BUILD_PRX = 0
 

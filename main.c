@@ -1,5 +1,6 @@
 #include "main.h"
 #include "rewind.h" //davex
+#include <kubridge.h>
 //https://ameblo.jp/pspdevblog/theme8-10001513763.html
 
 #define VERS    1
@@ -328,6 +329,19 @@ void mainloop(void)
 	}
 }
 
+static void load_gbk_plugin(char *rin_path)
+{
+  char prx_path[MAX_PATH];
+  sprintf(prx_path, "%scp_fix_gbk.prx", rin_path);
+
+  SceUID mod = kuKernelLoadModule(prx_path, 0, NULL);
+  if (mod >= 0)
+  {
+    int status;
+    sceKernelStartModule(mod, 0, 0, &status, NULL);
+  }
+}
+
 int main(int argc, char *argv[])
 {
 	int romsize, ramsize;
@@ -340,6 +354,7 @@ int main(int argc, char *argv[])
 	*++p = 0;
 	sprintf(CheatPath, "%sCHEAT/", RinPath);
 
+	load_gbk_plugin(RinPath);
 	SetupCallbacks();
 	pgScreenFrame(2,0);
 	wavoutInit();
