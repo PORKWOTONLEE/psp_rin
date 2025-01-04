@@ -230,8 +230,7 @@ void rin_frame(const char *msg0, const char *msg1)
 		pgFillvram(setting.color[0]);
 
 	// バージョンナンバー
-	sprintf(tmp, "■ ＲＩＮ Ver%s ■", VERRIN);
-	mn_printf(465-strlen(tmp)*5, 0, setting.color[1], tmp);
+	mn_printf(385-strlen(VERRIN)*5, 5, setting.color[1],"■ ＲＩＮ Ver%s ■",VERRIN);
 
 	// メッセージなど
 	if(msg0) mn_printf(17, 14, setting.color[2], msg0);
@@ -243,13 +242,13 @@ void rin_frame(const char *msg0, const char *msg1)
 
 	// バッテリーライフ
 	if(scePowerIsBatteryExist()){
-		sprintf(tmp,"Battery[%d%%]",scePowerGetBatteryLifePercent());
+		sprintf(tmp,"[%d%%]",scePowerGetBatteryLifePercent());
 		if(!scePowerIsPowerOnline()){
 			int time=scePowerGetBatteryLifeTime();
 			if(time >= 0)
 				sprintf(&tmp[strlen(tmp)-1],"(%d:%02d)]",time/60,time%60);
 		}
-		mn_printf(465-strlen(tmp)*5, 252, setting.color[2], tmp);
+		mn_printf(440-strlen(tmp)*5, 252, setting.color[2], "电池 %s", tmp);
 	}
 }
 
@@ -263,9 +262,9 @@ int rin_MessageBox(const char *msg, int type){
 		}
 
 		if(type)
-			rin_frame(0,"○：OK  ×：Cancel");
+			rin_frame(0,"Ｏ：确定 Ｘ：取消");
 		else
-			rin_frame(0,"○：OK");
+			rin_frame(0,"Ｏ：确定");
 		mn_printf(28,32,setting.color[3],msg);
 		pgScreenFlipV();
 	}
@@ -368,17 +367,13 @@ void rin_colorconfig(void)
 			if(sel!=INIT)	sel++;
 			else			sel=0;
 		}else if(new_pad & CTRL_RIGHT){
-			if(sel<COLOR1_R) 		sel=COLOR1_R;
-			else if(sel<COLOR2_R)	sel=COLOR2_R;
-			else if(sel<COLOR3_R)	sel=COLOR3_R;
-			else if(sel<BG_BRIGHT)	sel=BG_BRIGHT;
-			else if(sel<EXIT)		sel=EXIT;
+			if (sel<=COLOR0_G)
+				sel+=13;
+			else if (sel<=BG_BRIGHT)
+				sel=INIT;
 		}else if(new_pad & CTRL_LEFT){
-			if(sel>BG_BRIGHT)		sel=BG_BRIGHT;
-			else if(sel>COLOR3_B)	sel=COLOR3_R;
-			else if(sel>COLOR2_B)	sel=COLOR2_R;
-			else if(sel>COLOR1_B)	sel=COLOR1_R;
-			else					sel=COLOR0_R;
+			if (sel>=EXIT)
+				sel-=13;
 		}
 		if(!bLoop) break;
 
@@ -387,58 +382,81 @@ void rin_colorconfig(void)
 
 		if (crs_count++>=30) crs_count=0;
 
-		x = 2;
-		y = 5;
+		x = 35;
+		y = 35;
 
 		if(sel>=COLOR0_R && sel<=BG_BRIGHT)
-			strcpy(msg, "○：Add　□：Sub ×：Return");
+			strcpy(msg, "Ｏ：增加　□：减少 Ｘ：返回");
 		else
-			strcpy(msg, "○：OK ×：Return");
+			strcpy(msg, "Ｏ：确定 Ｘ：返回");
 
 		rin_frame(0, msg);
 
-		pgPrint(x,y++,setting.color[3],"  COLOR0 R:");
-		pgPrint(x,y++,setting.color[3],"  COLOR0 G:");
-		pgPrint(x,y++,setting.color[3],"  COLOR0 B:");
-		y++;
-		pgPrint(x,y++,setting.color[3],"  COLOR1 R:");
-		pgPrint(x,y++,setting.color[3],"  COLOR1 G:");
-		pgPrint(x,y++,setting.color[3],"  COLOR1 B:");
-		y++;
-		pgPrint(x,y++,setting.color[3],"  COLOR2 R:");
-		pgPrint(x,y++,setting.color[3],"  COLOR2 G:");
-		pgPrint(x,y++,setting.color[3],"  COLOR2 B:");
-		y++;
-		pgPrint(x,y++,setting.color[3],"  COLOR3 R:");
-		pgPrint(x,y++,setting.color[3],"  COLOR3 G:");
-		pgPrint(x,y++,setting.color[3],"  COLOR3 B:");
-		y++;
-		if(setting.bgbright / 100 == 1)
-			pgPrint(x,y++,setting.color[3],"  BG BRIGHT:100%");
-		else
-			pgPrint(x,y++,setting.color[3],"  BG BRIGHT:  0%");
+		mn_printf(x,y,setting.color[3],"颜色0 R:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色0 G:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色0 B:");
+		y+=24;
+		mn_printf(x,y,setting.color[3],"颜色1 R:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色1 G:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色1 B:");
+		y+=24;
+		mn_printf(x,y,setting.color[3],"颜色2 R:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色2 G:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色2 B:");
+		y+=24;
+		mn_printf(x,y,setting.color[3],"颜色3 R:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色3 G:");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"颜色3 B:");
+		y+=24;
+		if(setting.bgbright / 100 == 1) {
+			mn_printf(x,y,setting.color[3],"背景亮度：100%");
+			y+=12;
+		}
+		else {
+			mn_printf(x,y,setting.color[3],"背景亮度：0%");
+			y+=12;
+		}
 		if(setting.bgbright % 100 != 0)			// 10%?90%
-			pgPutChar((x+13)*8,(y-1)*8,setting.color[3],0,'0'+setting.bgbright/10,1,0,1);
-		y++;
-		pgPrint(x,y++,setting.color[3],"  Return to Main Menu");
-		pgPrint(x,y++,setting.color[3],"  Initialize");
+			mn_printf((x+13)*8,(y-1)*8,setting.color[3],0,'0'+setting.bgbright/10,1,0,1);
+		y+=12;
+		mn_printf(285,35,setting.color[3],"返回主菜单");
+		y+=12;
+		mn_printf(285,47,setting.color[3],"恢复默认值");
 
-		x=14; y=5;
+		x = 80;
+		y = 35;
 		for(i=0; i<12; i++){
-			if(i!=0 && i%3==0) y++;
+			if(i!=0 && i%3==0) y+=12;
 			sprintf(tmp, "%d", color[i/3][i%3]);
-			pgPrint(x,y++,setting.color[3],tmp);
+			mn_printf(x,y,setting.color[3],tmp);
+			y+=12;
 		}
 
+		x = 35;
+		y = 35;
 		if (crs_count < 15){
-			x = 2;
-			y = sel + 5;
-			if(sel>=COLOR1_R) y++;
-			if(sel>=COLOR2_R) y++;
-			if(sel>=COLOR3_R) y++;
-			if(sel>=BG_BRIGHT) y++;
-			if(sel>=EXIT) y++;
-			pgPutChar((x+1)*8,y*8,setting.color[3],0,127,1,0,1);
+			if (sel>=EXIT) {
+				x += 245;
+				y = y + (sel-EXIT) * 12;
+			}
+			else
+			{
+				if (sel>=COLOR1_R) y+=12;
+				if (sel>=COLOR2_R) y+=12;
+				if (sel>=COLOR3_R) y+=12;
+				if (sel>=BG_BRIGHT) y+=12;
+				x = x - 5;
+				y = y + sel * 12;
+			}
+			mn_printf(x,y,setting.color[3],">");
 		}
 
 		pgScreenFlipV();
@@ -556,44 +574,60 @@ void rin_keyconfig(void)
 		if (crs_count++>=30) crs_count=0;
 
 		if(sel>=CONFIG_ANALOG2DPAD)
-			strcpy(msg,"○：OK");
+			strcpy(msg,"Ｏ：确定");
 		else
-			strcpy(msg,"←→：Clear");
+			strcpy(msg,"←→：清除键位");
 
 		rin_frame(0, msg);
 
-		x=2; y=5;
-		pgPrint(x,y++,setting.color[3],"  A BUTTON       :");
-		pgPrint(x,y++,setting.color[3],"  B BUTTON       :");
-		pgPrint(x,y++,setting.color[3],"  A BUTTON(RAPID):");
-		pgPrint(x,y++,setting.color[3],"  B BUTTON(RAPID):");
-		pgPrint(x,y++,setting.color[3],"  SELECT BUTTON  :");
-		pgPrint(x,y++,setting.color[3],"  START BUTTON   :");
-		pgPrint(x,y++,setting.color[3],"  MENU BUTTON    :");
-		pgPrint(x,y++,setting.color[3],"  TURBO ON/OFF   :");
-		pgPrint(x,y++,setting.color[3],"  REWIND         :");
-		//pgPrint(x,y++,setting.color[3],"  VSYNC ON/OFF   :");//davex: VSYNC removed as key
-		pgPrint(x,y++,setting.color[3],"  SOUND ON/OFF   :");
-		pgPrint(x,y++,setting.color[3],"  SCREEN SIZE    :");
-		pgPrint(x,y++,setting.color[3],"  QUICK SAVE     :");
-		pgPrint(x,y++,setting.color[3],"  QUICK LOAD     :");
-		pgPrint(x,y++,setting.color[3],"  QUICK SLOT     :");
-		pgPrint(x,y++,setting.color[3],"  GB PALETTE     :");
-		pgPrint(x,y++,setting.color[3],"  CPU CLOCK      :");
-		y++;
+		x=35; y=35;
+		mn_printf(x,y,setting.color[3],"A 键：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"B 键：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"A 键（连发）：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"B 键（连发）：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"SELECT键：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"START键：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"菜单键：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"连发开关：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"回溯：");
+		y+=12;
+		//mn_printf(x,y,setting.color[3],"  VSYNC ON/OFF   :");//davex: VSYNC removed as key
+		y+=12;
+		mn_printf(x,y,setting.color[3],"音频开关：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"屏幕尺寸：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"即时存档：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"即时读档：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"快速存档：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"GB调色盘：");
+		y+=12;
+		mn_printf(x,y,setting.color[3],"CPU频率：");
+		y+=12;
 		if(setting.analog2dpad)
-			pgPrint(x,y++,setting.color[3],"  AnalogPad to D-Pad: ON");
+			mn_printf(x+250,35,setting.color[3],"摇杆：开启");
 		else
-			pgPrint(x,y++,setting.color[3],"  AnalogPad to D-Pad: OFF");
-		y++;
-		pgPrint(x,y++,setting.color[3],"  Return to Main Menu");
+			mn_printf(x+250,35,setting.color[3],"摇杆：关闭");
+		y+=12;
+		mn_printf(x+250,47,setting.color[3],"返回主菜单");
 
 		for (i=0; i<CONFIG_ANALOG2DPAD; i++){
-			y = i + 5;
+			y = 35 + i * 12;
 			int j = 0;
 			msg[0]=0;
 			if(key_config[i] == 0){
-				strcpy(msg,"UNDEFINED");
+				strcpy(msg,"未定义");
 			}else{
 				if (key_config[i] & CTRL_LTRIGGER){
 					msg[j++]='L'; msg[j++]='+'; msg[j]=0;
@@ -602,16 +636,16 @@ void rin_keyconfig(void)
 					msg[j++]='R'; msg[j++]='+'; msg[j]=0;
 				}
 				if (key_config[i] & CTRL_CIRCLE){
-					msg[j++]=1; msg[j++]='+'; msg[j]=0;
+					strcat(msg,"Ｏ +"); j+=3;
 				}
 				if (key_config[i] & CTRL_CROSS){
-					msg[j++]=2; msg[j++]='+'; msg[j]=0;
+					strcat(msg,"Ｘ +"); j+=3;
 				}
 				if (key_config[i] & CTRL_SQUARE){
-					msg[j++]=3; msg[j++]='+'; msg[j]=0;
+					strcat(msg,"□ +"); j+=3;
 				}
 				if (key_config[i] & CTRL_TRIANGLE){
-					msg[j++]=4; msg[j++]='+'; msg[j]=0;
+					strcat(msg,"△ +"); j+=3;
 				}
 				if (key_config[i] & CTRL_START){
 					strcat(msg,"START+"); j+=6;
@@ -633,16 +667,27 @@ void rin_keyconfig(void)
 				}
 				msg[strlen(msg)-1]=0;
 			}
-			pgPrint(21,y,setting.color[3],msg);
+			if (i>=CONFIG_SOUND)
+			{
+				y+=12;
+			}
+			mn_printf(120,y,setting.color[3],msg);
 		}
 
-
+		x = 35;
+		y = 35;
 		if (crs_count < 15){
-			x = 2;
-			y = sel + 5;
-			if(sel >= CONFIG_ANALOG2DPAD) y++;
-			if(sel >= CONFIG_EXIT)        y++;
-			pgPutChar((x+1)*8,y*8,setting.color[3],0,127,1,0,1);
+			if (sel>=CONFIG_ANALOG2DPAD) {
+				x += 245;
+				y = y + (sel-CONFIG_ANALOG2DPAD) * 12;
+			}
+			else
+			{
+				if (sel>=CONFIG_SOUND) y+=12;
+				x = x - 5;
+				y = y + sel * 12;
+			}
+			mn_printf(x,y,setting.color[3],">");
 		}
 
 		pgScreenFlipV();
@@ -663,7 +708,7 @@ void rin_keyconfig(void)
 }
 
 const char *gbtype_names[] = {
-	"AUTO",
+	"自动",
 	"GB",
 	"SGB",
 	"GBC",
@@ -693,12 +738,13 @@ int rin_gbtype(int n)
 			if(sel<0) sel=0;
 		}
 
-		rin_frame("Select GB Type", "○：OK  ×：Cancel");
+		rin_frame("选择GB类型", "Ｏ：确定 Ｘ：取消");
 
-		x=4, y=5;
-		pgPrint(x++,y++,setting.color[3],"GB TYPE:");
-		for(i=0; i<=4; i++)
-			pgPrint(x,y++,setting.color[i==sel?2:3],gbtype_names[i]);
+		x=35, y=35;
+		for(i=0; i<=4; i++){
+			mn_printf(x,y,setting.color[i==sel?2:3],gbtype_names[i]);
+			y+=12;
+		}
 
 		pgScreenFlipV();
 	}
@@ -735,16 +781,16 @@ int rin_screensize(int n)
 		}
 
 		if(setting.bScreenSizes[sel])
-			rin_frame("Select Screen Size", "○：OK  ×：Cancel   SELECT：Disable");
+			rin_frame("选择屏幕尺寸", "Ｏ：确定 Ｘ：取消  ＳＥＬＥＣＴ：禁用");
 		else
-			rin_frame("Select Screen Size", "○：OK  ×：Cancel   SELECT：Enable");
+			rin_frame("选择屏幕尺寸", "Ｏ：确定 Ｘ：取消  ＳＥＬＥＣＴ：启用");
 
-		x=4, y=5;
-		pgPrint(x++,y++,setting.color[3],"SCREEN SIZE:");
+		x=35, y=35;
 		for(i=0; i<SCR_END; i++){
 			if(setting.bScreenSizes[i])
-				pgPrint(x-2,y,setting.color[1],"+");
-			pgPrint(x,y++,setting.color[i==sel?2:3],scr_names[i]);
+				mn_printf(x-2,y,setting.color[1],"+");
+			mn_printf(x,y,setting.color[i==sel?2:3],scr_names[i]);
+			y+=12;
 		}
 
 		pgScreenFlipV();
@@ -782,16 +828,16 @@ int rin_gbcolor(int n)
 		}
 
 		if(setting.bGB_Pals[sel])
-			rin_frame("Select GB Palette", "○：OK  ×：Cancel   SELECT:Disable");
+			rin_frame("选择GB调色盘", "Ｏ：确定 Ｘ：取消  ＳＥＬＥＣＴ：禁用");
 		else
-			rin_frame("Select GB Palette", "○：OK  ×：Cancel   SELECT:Enable");
+			rin_frame("选择GB调色盘", "Ｏ：确定 Ｘ：取消  ＳＥＬＥＣＴ：启用");
 
-		x=4, y=5;
-		pgPrint(x++,y++,setting.color[3],"GB PALETTE:");
+		x=35, y=35;
 		for(i=1; i<PAL_SGB; i++){
 			if(setting.bGB_Pals[i])
-				pgPrint(x-2,y,setting.color[1],"+");
-			pgPrint(x,y++,setting.color[i==sel?2:3],pal_names[i]);
+				mn_printf(x,y,setting.color[1],"+");
+			mn_printf(x,y,setting.color[i==sel?2:3],pal_names[i]);
+			y+=12;
 		}
 
 		pgScreenFlipV();
@@ -825,13 +871,13 @@ int rin_frameskip(int sel)
 			if(sel<0) sel=0;
 		}
 
-		rin_frame("Select Max Frame Skip", "○：OK  ×：Cancel");
+		rin_frame("选择最大跳帧数", "Ｏ：确定 Ｘ：取消");
 
-		x=4, y=5;
-		pgPrint(x++,y++,setting.color[3],"MAX FRAME SKIP:");
+		x=35, y=35;
 		for(i=0; i<=9; i++){
 			tmp[0] = i + '0';
-			pgPrint(x,y++,setting.color[i==sel?2:3],tmp);
+			mn_printf(x,y++,setting.color[i==sel?2:3],tmp);
+			y += 12;
 		}
 
 		pgScreenFlipV();
@@ -839,7 +885,7 @@ int rin_frameskip(int sel)
 }
 
 const char *cpu_clocks[] = {
-	"222MHz (default)",
+	"222MHz（默认）",
 	"266MHz",
 	"333MHz",
 };
@@ -861,21 +907,22 @@ int rin_cpuclock(int sel)
 			if(sel<0) sel=2;
 		}
 
-		rin_frame("Select CPU Clock (DANGER! DANGER! DANGER! DANGER! DANGER!)", "○：OK  ×：Cancel");
+		rin_frame("选择CPU频率（危险！危险！危险！）", "Ｏ：确定 Ｘ：取消");
 
-		x=4, y=5;
-		pgPrint(x++,y++,setting.color[3],"CPU CLOCK:");
-		for(i=0; i<3; i++)
-			pgPrint(x,y++,setting.color[i==sel?2:3],cpu_clocks[i]);
+		x=35, y=35;
+		for(i=0; i<3; i++) {
+			mn_printf(x,y,setting.color[i==sel?2:3],cpu_clocks[i]);
+			y+=12;
+		}
 
 		pgScreenFlipV();
 	}
 }
 
 const char *sound_buffers[] = {
-	"FAST",
-	"NORMAL",
-	"SLOW",
+	"快速",
+	"普通",
+	"慢速",
 };
 int rin_sound_buffers(int sel)
 {
@@ -895,12 +942,13 @@ int rin_sound_buffers(int sel)
 			if(sel<0) sel=2;
 		}
 
-		rin_frame("Select Sound Buffer", "○：OK  ×：Cancel");
+		rin_frame("选择音频缓存方式", "Ｏ：确定 Ｘ：取消");
 
-		x=4, y=5;
-		pgPrint(x++,y++,setting.color[3],"SOUND BUFFER:");
-		for(i=0; i<3; i++)
-			pgPrint(x,y++,setting.color[i==sel?2:3],sound_buffers[i]);
+		x=35, y=35;
+		for(i=0; i<3; i++) {
+			mn_printf(x,y,setting.color[i==sel?2:3],sound_buffers[i]);
+			y+=12;
+		}
 
 		pgScreenFlipV();
 	}
@@ -1039,18 +1087,18 @@ int rin_stateslot(int type)
 		switch(type)
 		{
 		case RIN_STATE_LOAD:
-			p = "Select State Load Slot";
+			p = "选择加载存档插槽";
 			break;
 		case RIN_STATE_SAVE:
-			p = "Select State Save Slot";
+			p = "选择保存存档插槽";
 			break;
 		case RIN_QUICK_SLOT:
-			p = "Select Quick Slot";
+			p = "选择快速存档插槽";
 			break;
 		default:
 			p = NULL;
 		}
-		rin_frame(p,"○：OK  ×：Cancel   SELECT：Remove");
+		rin_frame(p,"Ｏ：确定 Ｘ：取消  ＳＥＬＥＣＴ：删除");
 
 		if ((sel>STATE_SLOT_MAX && state_tmp) ||
 			(sel<=STATE_SLOT_MAX && nState[sel]>=0 && nThumb[sel]>=0)){
@@ -1059,26 +1107,27 @@ int rin_stateslot(int type)
 			pgDrawFrame(271,49,432,194,setting.color[1]);
 		}
 
-		switch(type)
-		{
-		case RIN_STATE_LOAD:
-			p = "STATE LOAD:";
-			break;
-		case RIN_STATE_SAVE:
-			p = "STATE SAVE:";
-			break;
-		case RIN_QUICK_SLOT:
-			p = "QUICK SLOT:";
-			break;
-		}
-		x=4, y=5;
-		pgPrint(x++,y++,setting.color[3],p);
+		// switch(type)
+		// {
+		// case RIN_STATE_LOAD:
+		// 	p = "加载从：";
+		// 	break;
+		// case RIN_STATE_SAVE:
+		// 	p = "保存到：";
+		// 	break;
+		// case RIN_QUICK_SLOT:
+		// 	p = "快速保存到：";
+		// 	break;
+		// }
+		x=35, y=35;
+		// mn_printf(x++,y,setting.color[3],p);
+		// y+=12;
 
 		for(i=0; i<=STATE_SLOT_MAX; i++){
 			if(nState[i] < 0){
-				sprintf(msg,"%d - None", i);
+				sprintf(msg,"普通插槽 %d - 暂空", i);
 			}else{
-				sprintf(msg, "%d - %04d/%02d/%02d %02d:%02d:%02d", i,
+				sprintf(msg, "普通插槽 %d - %04d/%02d/%02d %02d:%02d:%02d", i,
 					files[nState[i]].d_stat.sce_st_mtime.year,
 					files[nState[i]].d_stat.sce_st_mtime.month,
 					files[nState[i]].d_stat.sce_st_mtime.day,
@@ -1086,11 +1135,12 @@ int rin_stateslot(int type)
 					files[nState[i]].d_stat.sce_st_mtime.minute,
 					files[nState[i]].d_stat.sce_st_mtime.second);
 			}
-			pgPrint(x,y++,setting.color[i==sel?2:3],msg);
+			mn_printf(x,y,setting.color[i==sel?2:3],msg);
+			y += 12;
 		}
-		y++;
+		y+=12;
 		if (state_tmp){
-			sprintf(msg, "TMP:%04d/%02d/%02d %02d:%02d:%02d",
+			sprintf(msg, "临时插槽：%04d/%02d/%02d %02d:%02d:%02d",
 				state_tmp_time.year,
 				state_tmp_time.month,
 				state_tmp_time.day,
@@ -1098,8 +1148,8 @@ int rin_stateslot(int type)
 				state_tmp_time.minute,
 				state_tmp_time.second);
 		}else
-			strcpy(msg,"TMP:None");
-		pgPrint(x,y++,setting.color[i==sel?2:3],msg);
+			strcpy(msg,"临时插槽：暂空");
+		mn_printf(x,y++,setting.color[i==sel?2:3],msg);
 
 		pgScreenFlipV();
 	}
@@ -1142,7 +1192,7 @@ void select_cheat(void)
 		if(sel >= top+rows)		top=sel-rows+1;
 		if(sel < top)			top=sel;
 
-		rin_frame("","○：OK  ×：Return  □：All");
+		rin_frame("","Ｏ：确定 Ｘ：返回  □：所有");
 
 		// スクロールバー
 		if(nCheats > rows){
@@ -1217,15 +1267,15 @@ void rin_menu(void)
 			case STATE_SAVE:
 				ret = rin_stateslot(RIN_STATE_SAVE);
 				if(ret>=0){
-					strcpy(msg, "State Save Failed");
+					strcpy(msg, "即时存档失败");
 					if(ret>STATE_SLOT_MAX){
 						free(state_tmp);
 						state_tmp = save_state_tmp();
 						if(state_tmp)
-							strcpy(msg, "State Saved Successfully");
+							strcpy(msg, "即时存档成功");
 					}else{
 						if(save_state(ret))
-							strcpy(msg, "State Saved Successfully");
+							strcpy(msg, "即时存档成功");
 					}
 				}
 				crs_count=0;
@@ -1233,14 +1283,14 @@ void rin_menu(void)
 			case STATE_LOAD:
 				ret = rin_stateslot(RIN_STATE_LOAD);
 				if(ret>=0){
-					strcpy(msg, "State Load Failed");
+					strcpy(msg, "即时读档失败");
 					if(ret>STATE_SLOT_MAX){
 						if(load_state_tmp(state_tmp))
-//							strcpy(msg, "State Loaded Successfully");
+							// strcpy(msg, "即时读档成功");
 							bLoop = 0;
 					}else{
 						if(load_state(ret))
-//							strcpy(msg, "State Loaded Successfully");
+							// strcpy(msg, "即时读档成功");
 							bLoop = 0;
 					}
 				}
@@ -1318,11 +1368,11 @@ void rin_menu(void)
 				break;
 			case LOAD_CHEAT:
 				if(getFilePath(CheatPath,EXT_TCH)){
-					strcpy(msg, "Cheat Load Failed");
+					strcpy(msg, "金手指文件加载失败");
 					FILE *fp = fopen(CheatPath,"r");
 					if (fp){
 						if (cheat_load(fp))
-							strcpy(msg, "Cheat Loaded Successfully");
+							strcpy(msg, "金手指文件加载成功");
 						fclose(fp);
 					}
 				}
@@ -1404,19 +1454,20 @@ void rin_menu(void)
 			if(sel!=CREDITS)	sel++;
 			else				sel=0;
 		}else if(new_pad & CTRL_LEFT){
-			if(sel>LOAD_CHEAT)
-				sel=LOAD_CHEAT;
-			else if(sel>KEY_CONFIG)
-				sel=SCREEN_SIZE;
-			else if(sel>0)
-				sel=0;
+			if(sel>=COLOR_CONFIG) {
+				if (sel >= KEY_CONFIG) sel++;
+				sel -= 15;
+			}
 		}else if(new_pad & CTRL_RIGHT){
-			if(sel<SCREEN_SIZE)
-				sel=SCREEN_SIZE;
-			else if(sel<LOAD_CHEAT)
-				sel=LOAD_CHEAT;
-			else if(sel<LOAD_ROM)
-				sel=LOAD_ROM;
+			if (sel <= TURBO)
+			{
+				if (sel >= SAVE_THUMB) sel--;
+				sel += 15;
+			}
+			else if (sel <=CPU_CLOCK)
+			{
+				sel = CONTINUE;
+			}
 		}else if(new_pad & CTRL_TRIANGLE){
 			rin_menu_credits();
 			crs_count=0;
@@ -1428,49 +1479,65 @@ void rin_menu(void)
 		if(!bLoop) break;
 		if (crs_count++>=30) crs_count=0;
 
-		rin_frame(msg, "○：OK  ×：Continue  MenuBTN：Continue  △: Credits");
+		rin_frame(msg, "Ｏ：确定 Ｘ：继续  MenuBTN：继续 △: 贡献列表");
 
-		x = 4;
-		y = 4;
+		x = 35;
+		y = 35;
 
-		pgPrintf(x,y++,setting.color[3],"STATE SAVE");
-		pgPrintf(x,y++,setting.color[3],"STATE LOAD");
+		mn_printf(x,y,setting.color[3],"即时存档");
+		mn_printf(x,y+12,setting.color[3],"即时读档");
 		if (setting.quickslot > STATE_SLOT_MAX)
-			pgPrintf(x,y++,setting.color[3],"QUICK SLOT    : TEMP");
+			mn_printf(x,y+24,setting.color[3],"快速存档：临时插槽");
 		else
-			pgPrintf(x,y++,setting.color[3],"QUICK SLOT    : %d",setting.quickslot);
-		pgPrintf(x,y++,setting.color[3],"SAVE THUMBNAIL: %s",setting.thumb?"ON":"OFF");
-		pgPrintf(x,y++,setting.color[3],"COMPRESS FILE : %s",setting.compress?"ON":"OFF");
-		y++;
-		pgPrintf(x,y++,setting.color[3],"SCREEN SIZE   : %s",scr_names[setting.screensize]);
-		pgPrintf(x,y++,setting.color[3],"GB TYPE       : %s",gbtype_names[setting.gb_type]);
-		pgPrintf(x,y++,setting.color[3],"GB PALETTE    : %s",pal_names[setting.gb_palette]);
-		pgPrintf(x,y++,setting.color[3],"TURBO         : %s",bTurbo?"ON":"OFF");
-		pgPrintf(x,y++,setting.color[3],"REWIND        : %s",rin_menu_rewind_get_main_menu_string());
-		pgPrintf(x,y++,setting.color[3],"VSYNC         : %s",setting.vsync?"ON":"OFF");
-		pgPrintf(x,y++,setting.color[3],"SOUND         : %s",setting.sound?"ON":"OFF");
-		pgPrintf(x,y++,setting.color[3],"SOUND BUFFER  : %s",sound_buffers[setting.sound_buffer]);
-		pgPrintf(x,y++,setting.color[3],"MAX FRAME SKIP: %d",setting.frameskip);
-		pgPrintf(x,y++,setting.color[3],"CPU CLOCK     : %s",cpu_clocks[setting.cpu_clock]);
-		pgPrintf(x,y++,setting.color[3],"MENU COLOR CONFIG");
-		pgPrintf(x,y++,setting.color[3],"KEY CONFIG");
-		y++;
-		pgPrintf(x,y++,setting.color[3],"Load Cheat File");
-		pgPrintf(x,y++,setting.color[nCheats>0?3:2],"Select Cheatcode");
-		y++;
-		pgPrintf(x,y++,setting.color[3],"Back to ROM list");
-		pgPrintf(x,y++,setting.color[3],"Reset");
-		pgPrintf(x,y++,setting.color[3],"Continue");
-		pgPrintf(x,y++,setting.color[3],"Credits");
+			mn_printf(x,y+24,setting.color[3],"快速存档：普通插槽 %d",setting.quickslot);
+		mn_printf(x,y+36,setting.color[3],"存档缩略图：%s",setting.thumb?"开启":"关闭");
+		mn_printf(x,y+48,setting.color[3],"压缩存档：%s",setting.compress?"开启":"关闭");
 
+		mn_printf(x,y+72,setting.color[3],"屏幕尺寸：%s",scr_names[setting.screensize]);
+		mn_printf(x,y+84,setting.color[3],"GB类型：%s",gbtype_names[setting.gb_type]);
+		mn_printf(x,y+96,setting.color[3],"GB调色盘：%s",pal_names[setting.gb_palette]);
+		mn_printf(x,y+108,setting.color[3],"按键连发：%s",bTurbo?"开启":"关闭");
+		mn_printf(x,y+120,setting.color[3],"回溯：%s",rin_menu_rewind_get_main_menu_string());
+		mn_printf(x,y+132,setting.color[3],"VSYNC：%s",setting.vsync?"开启":"关闭");
+		mn_printf(x,y+144,setting.color[3],"声音：%s",setting.sound?"开启":"关闭");
+		mn_printf(x,y+156,setting.color[3],"声音缓冲区：%s",sound_buffers[setting.sound_buffer]);
+		mn_printf(x,y+168,setting.color[3],"最大跳帧数：%d",setting.frameskip);
+		mn_printf(x,y+180,setting.color[3],"CPU频率：%s",cpu_clocks[setting.cpu_clock]);
+
+		mn_printf(x+250,y,setting.color[3],"菜单颜色设置");
+		mn_printf(x+250,y+12,setting.color[3],"按键设置");
+
+		mn_printf(x+250,y+36,setting.color[3],"加载金手指文件");
+		mn_printf(x+250,y+48,setting.color[nCheats>0?3:2],"选择作弊码");
+		
+		mn_printf(x+250,y+72,setting.color[3],"返回ROM列表");
+		mn_printf(x+250,y+84,setting.color[3],"重置");
+		mn_printf(x+250,y+96,setting.color[3],"继续");
+		mn_printf(x+250,y+108,setting.color[3],"贡献列表");
+		
 		if(crs_count < 15){
-			y = sel + 4;
-			if(sel >= SCREEN_SIZE)	y++;
-			if(sel >= LOAD_CHEAT)	y++;
-			if(sel >= LOAD_ROM)		y++;
-
-			tmp[0]=127; tmp[1]=0;
-			pgPrintf(x-1,y,setting.color[3],tmp);
+			if (sel>=COLOR_CONFIG) {
+				x += 245;
+				if (sel >= LOAD_ROM)
+				{
+					y += 24;
+				}
+				else if (sel >= LOAD_CHEAT)
+				{
+					y += 12;
+				}
+				y = y + (sel-COLOR_CONFIG) * 12;
+			}
+			else
+			{
+				if (sel >= SCREEN_SIZE)
+				{
+					y += 12;
+				}
+				x = x - 5;
+				y = y + sel * 12;
+			}
+			mn_printf(x,y,setting.color[3],">");
 		}
 
 		pgScreenFlipV();

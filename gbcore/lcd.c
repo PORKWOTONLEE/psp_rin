@@ -28,19 +28,19 @@
 #define RGB(r,g,b) ((((b>>3) & 0x1F)<<10)|(((g>>3) & 0x1F)<<5)|(((r>>3) & 0x1F)<<0))
 
 const char *pal_names[] = {
-	"Monochrome",
-	"Bright Sepia",
-	"Red",
-	"Dark Sepia",
-	"Pastel Color",
-	"Orange",
-	"Yellow",
-	"Bright Blue",
-	"Dark Blue",
-	"Gray",
-	"Bright Green",
-	"Dark Green",
-	"Reverse"
+	"黑白色",
+	"浅褐色",
+	"红色",
+	"深褐色",
+	"柔和色彩",
+	"橙色",
+	"黄色",
+	"浅蓝色",
+	"深蓝色",
+	"灰色",
+	"浅绿色",
+	"深绿色",
+	"反色"
 };
 
 const word m_pal16[14][3][4] = {

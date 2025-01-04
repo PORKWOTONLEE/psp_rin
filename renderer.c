@@ -11,26 +11,26 @@ long render_msg_time;
 
 const char *scr_names[] = {
 	"x1",
-	"x1.5 (filtered)",
-	"x2 (uncropped)",
-	"x2 (fit)",
-	"x2 (scanline)",
-	"x2 (uncropped without top)",
-	"x2 (uncropped without bottom)",
-	"FULL",
+	"x1.5（带滤镜）",
+	"x2（原比例居中）",
+	"x2（填充）",
+	"x2（扫描线）",
+	"x2（原比例居下）",
+	"x2（原比例居上）",
+	"拉伸",
 #ifdef USE_GPU
 	"x1.5 BL",
 	"x2 (fit) BL",
 	"FULL BL",
 #endif
-    "x1 MIRROR",//davex: mirror modes
-	"x1.5 (filtered) MIRROR",
-	"x2 (uncropped) MIRROR",
-	"x2 (fit) MIRROR",
-	"x2 (scanline) MIRROR",
-	"x2 (uncropped without top) MIRROR",
-	"x2 (uncropped without bottom) MIRROR",
-	"FULL MIRROR",
+    "x1 镜像",//davex: mirror modes
+	"x1.5（带滤镜）镜像",
+	"x2（原比例居中）镜像",
+	"x2（填充）镜像",
+	"x2（扫描线）镜像",
+	"x2（原比例居下）镜像",
+	"x2（原比例居上）镜像",
+	"拉伸 镜像",
 
 };
 

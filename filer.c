@@ -109,7 +109,7 @@ int funcUnzipCallback(int nCallbackId, unsigned long ulExtractSize, unsigned lon
         break;
     default: // unknown...
 		pgFillvram(RGB(255,0,0));
-		mn_printf(0,0,0xFFFF,"Unzip fatal error.");
+		mn_printf(0,0,0xFFFF,"解压失败");
 		pgScreenFlipV();
         break;
     }
@@ -179,7 +179,7 @@ long load_rom(const char *szRomPath)
 			// しまうがコールバックでキャンセルしてないので無視
 			lReadSize = 0;
 			pgFillvram(RGB(255,0,0));
-			mn_printf(0,0,0xFFFF,"Unzip fatal error.");
+			mn_printf(0,0,0xFFFF,"解压失败");
 			pgScreenFlipV();
 		}
 		lReadSize = stRomInfo.rom_size;
@@ -320,7 +320,7 @@ int getZipDirCallback(int nCallbackId, unsigned long ulExtractSize, unsigned lon
 		break;
 	default: // unknown...
 		pgFillvram(RGB(255,0,0));
-		mn_printf(0,0,0xFFFF,"Unzip fatal error.");
+		mn_printf(0,0,0xFFFF,"解压失败");
 		pgScreenFlipV();
         break;
     }
@@ -376,7 +376,7 @@ void getZipDir(const char *path)
 char filer_msg[256]={0};
 int getFilePath(char *fullpath, u32 ext)
 {
-	int sel=0, top=0, rows=21, x, y, h, i, up=0, inzip=0, oldDirType;
+	int sel=0, top=0, rows=18, x, y, h, i, up=0, inzip=0, oldDirType;
 	char path[MAX_PATH], oldDir[MAX_NAME], tmp[MAX_PATH], *p;
 	
 	path_inzip[0] = 0;
@@ -446,12 +446,12 @@ int getFilePath(char *fullpath, u32 ext)
 			if(!inzip && sortfiles[sel]->d_stat.st_attr == FIO_SO_IFREG){
 				strcpy(tmp,"\"");
 				strcat(tmp,sortfiles[sel]->d_name);
-				strcat(tmp,"\"\n\nRemove?");
+				strcat(tmp,"\"\n\n删除？");
 				if(rin_MessageBox(tmp,1)){
 					strcpy(tmp, path);
 					strcat(tmp, sortfiles[sel]->d_name);
 					if(sceIoRemove(tmp)>=0){
-						strcpy(filer_msg,"Removed \"");
+						strcpy(filer_msg,"已删除 \"");
 						strcat(filer_msg,sortfiles[sel]->d_name);
 						strcat(filer_msg,"\"");
 						getDir(path, ext);
@@ -521,9 +521,9 @@ int getFilePath(char *fullpath, u32 ext)
 		
 		if(inzip){
 			sprintf(tmp,"%s:/%s",strrchr(path,'/')+1,path_inzip);
-			rin_frame(tmp,"○：OK  ×：Cancel  △：UP");
+			rin_frame(tmp,"Ｏ：确定 Ｘ：取消 △：向上一级");
 		}else
-			rin_frame(filer_msg[0]?filer_msg:path,"○：OK  ×：Cancel  △：UP   SELECT：Remove");
+			rin_frame(filer_msg[0]?filer_msg:path,"Ｏ：确定 Ｘ：取消 △：向上一级 ＳＥＬＥＣＴ：删除");
 		
 		// スクロールバー
 		if(nfiles > rows){
@@ -537,7 +537,7 @@ int getFilePath(char *fullpath, u32 ext)
 		for(i=0; i<rows; i++){
 			if(top+i >= nfiles) break;
 			mn_printf(x, y, setting.color[top+i==sel?2:3], sortfiles[top+i]->d_name);
-			y+=10;
+			y+=12;
 		}
 		
 		pgScreenFlipV();

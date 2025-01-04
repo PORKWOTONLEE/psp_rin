@@ -70,7 +70,7 @@ int power_callback(int unknown, int pwrflags)
 		}
 	}
 	if(pwrflags & PSP_POWER_CB_BATTERY_LOW){
-		//renderer_set_msg("PSP Battery is Low!");
+		//renderer_set_msg("电池电量低！！！");
 		if (!bSleep){
 			bSleep=1;
 
@@ -369,12 +369,12 @@ int main(int argc, char *argv[])
 		// 指定したファイルをロードする。 by ruka
 		romsize = load_rom(RomPath);
 		if (!romsize){
-			strcpy(filer_msg,"ROM Load Failed");
+			strcpy(filer_msg,"ROM加载失败");
 			continue;
 		}
 		ramsize = load_sram(sram_space, sizeof(sram_space));
 		if (!gb_load_rom(rom_image, romsize, sram_space, ramsize)){
-			strcpy(filer_msg,"ROM Load Failed");
+			strcpy(filer_msg,"ROM加载失败");
 			continue;
 		}
 
