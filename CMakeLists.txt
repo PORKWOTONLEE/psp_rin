@@ -32,6 +32,6 @@ create_pbp_file(
     ICON_PATH ../ICON0.PNG
     BACKGROUND_PATH NULL
     PREVIEW_PATH NULL
-    TITLE "Rin 1.32 RM v2"
+    TITLE "Rin 1.32 RM v2 cn_zh"
     VERSION 01.00
 )
