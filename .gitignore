@@ -22,3 +22,4 @@ lib/zlib122
 *.elf
 /pspdev_new/
 /pspdev_old/
+build
