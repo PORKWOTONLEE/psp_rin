@@ -6,7 +6,9 @@
 //#include "syscall.h"
 #include "main.h"
 #include "pg.h"
+#include "menu.h"
 #include "gbcore/gb.h"
+#include "lib/iconv.h"
 
 #include "font.c"
 #include "rewind.h"
@@ -562,6 +564,19 @@ void pgScreenFlipV()
 	pgScreenFlip();
 }
 
+int convert_utf8_to_gbk(unsigned char *utf8_ch, size_t utf8_ch_len, char *gb2312_ch, size_t gb2312_ch_len) {
+    static iconv_t handle = NULL;
+	
+	if (!handle)
+	{
+		handle = iconv_open_r("gb2312", "utf-8");
+	}
+
+    iconv_r(handle, &utf8_ch, &utf8_ch_len, &gb2312_ch, &gb2312_ch_len);
+
+    return 0;
+}
+
 // by kwn
 void Draw_Char_Half_Width(int x,int y,const unsigned char c,int col) {
 	unsigned short *vr;
@@ -644,6 +659,17 @@ void Draw_Char_Full_Width(int x,int y,const unsigned char u,const unsigned char 
 	}
 }
 
+void fs_printf(int x,int y,int col,const char *str,...) {
+	va_list ap;
+	char szBuf[512];
+
+	va_start(ap, str);
+	vsprintf(szBuf, str, ap);
+	va_end(ap);
+
+	core_print(x, y, col, szBuf, setting.utf8_support ? UTF8 : CP936);
+}
+
 void mn_printf(int x,int y,int col,const char *str,...) {
 	va_list ap;
 	char szBuf[512];
@@ -652,38 +678,44 @@ void mn_printf(int x,int y,int col,const char *str,...) {
 	vsprintf(szBuf, str, ap);
 	va_end(ap);
 
-	core_print(x,y,col,szBuf);
+	core_print(x,y,col,szBuf, CP936);
 }
 
 // by kwn
-void core_print(int x,int y,int col,const char *msg) {
+void core_print(int x,int y,int col,const char *msg, int codepage) {
 	int xx = x;
-	char ch = 0, nch = 0, *gbk_ch = (char*)msg;
+	char gbk_ch[4] = {0}, *msg_ch = (char*)msg;
 
-	while(*gbk_ch != 0) {
-		ch = *gbk_ch++;
-		if (0x00<=ch && ch<=0x80)
+	while(*msg_ch != 0) {
+		if (0x00<=*msg_ch && *msg_ch<=0x80)
 		{
-			if (ch == '\n')
+			if (*msg_ch == '\n')
 			{
 				x = xx;
 				y += 10;
 			}
 			else
 			{
-				Draw_Char_Half_Width(x, y, ch, col);
+				Draw_Char_Half_Width(x, y, *msg_ch, col);
 				x += 5;
 			}
+			msg_ch++;
 		}
 		else
 		{
-			nch = *gbk_ch++;
-
-			ch = ch&0xFF;
-			nch = nch&0xFF;
-
-			Draw_Char_Full_Width(x,y,ch,nch,col);
-			x+=10;
+			if (codepage == UTF8) {
+				convert_utf8_to_gbk(msg_ch, 4, gbk_ch, 4);
+			}
+			else {
+				gbk_ch[0] = (*msg_ch)&0xFF;
+				gbk_ch[1] = *(msg_ch+1)&0xFF;
+			}
+			Draw_Char_Full_Width(x, y, gbk_ch[0], gbk_ch[1], col);
+			x += 10;
+			msg_ch+=2;
+			if (codepage == UTF8) {
+				msg_ch+=1;
+			}
 		}
 		if (x>=480) break;
 	}

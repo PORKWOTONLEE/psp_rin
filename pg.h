@@ -26,6 +26,9 @@ extern ctrl_data_t paddata;
 #define CMAX4_X 15
 #define CMAX4_Y 8
 
+#define UTF8  0
+#define CP936 1
+
 void pgInit();
 void pgWaitV();
 void pgWaitVn(unsigned long count);
@@ -53,7 +56,8 @@ void pgBitBltSgb(unsigned long x,unsigned long y,unsigned long *d);
 void pgPutChar(unsigned long x,unsigned long y,unsigned long color,unsigned long bgcolor,unsigned char ch,char drawfg,char drawbg,char mag);
 void pgDrawFrame(unsigned long x1, unsigned long y1, unsigned long x2, unsigned long y2, unsigned long color);
 void pgFillBox(unsigned long x1, unsigned long y1, unsigned long x2, unsigned long y2, unsigned long color);
-void core_print(int x,int y,int col,const char *str);
+void core_print(int x,int y,int col,const char *msg, int codepage);
+void fs_printf(int x,int y,int col,const char *str,...);
 void mn_printf(int x,int y,int col,const char *str,...);
 char *pgGetVramAddr(unsigned long x,unsigned long y);
 
@@ -69,7 +73,7 @@ extern u32 now_tick;
 
 //optimize
 
-//longÅäÁÐ¤ò¥³¥Ô©`¡£ÅäÁÐ¾³½ç¤Ï4¥Ð¥¤¥È¥¢¥é¥¤¥ó¤µ¤ì¤Æ¤¤¤ë±ØÒª¤¢¤ê
+//longï¿½ï¿½ï¿½Ð¤ò¥³¥Ô©`ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½4ï¿½Ð¥ï¿½ï¿½È¥ï¿½ï¿½é¥¤ï¿½ó¤µ¤ï¿½Æ¤ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
 static inline void __memcpy4(void *d, void *s, unsigned long c)
 {
 	//for (; c>0; --c) *(((unsigned long *)d)++)=*(((unsigned long *)s)++);
@@ -78,7 +82,7 @@ static inline void __memcpy4(void *d, void *s, unsigned long c)
 }
 
 
-//longÅäÁÐ¤Ë¥»¥Ã¥È¡£ÅäÁÐ¾³½ç¤Ï4¥Ð¥¤¥È¥¢¥é¥¤¥ó¤µ¤ì¤Æ¤¤¤ë±ØÒª¤¢¤ê
+//longï¿½ï¿½ï¿½Ð¤Ë¥ï¿½ï¿½Ã¥È¡ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½4ï¿½Ð¥ï¿½ï¿½È¥ï¿½ï¿½é¥¤ï¿½ó¤µ¤ï¿½Æ¤ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
 static inline void __memset4(void *d, unsigned long v, unsigned long c)
 {
 	//for (; c>0; --c) *(((unsigned long *)d)++)=v;
@@ -87,8 +91,8 @@ static inline void __memset4(void *d, unsigned long v, unsigned long c)
 }
 
 
-//longÅäÁÐ¤ò¥³¥Ô©`¡£ÅäÁÐ¾³½ç¤Ï4¥Ð¥¤¥È¥¢¥é¥¤¥ó¤µ¤ì¤Æ¤¤¤ë±ØÒª¤¢¤ê
-//¥³¥ó¥Ñ¥¤¥é¤Î×îßm»¯¤Ë¤è¤Ã¤ÆÓèÆÚ¤·¤Ê¤¤¥³©`¥É¤¬Éú³É¤µ¤ì¤ë¤¿¤á¡¢Ê®·Ö¤Ë×¢Òâ¤Î¤³¤È¡£
+//longï¿½ï¿½ï¿½Ð¤ò¥³¥Ô©`ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½4ï¿½Ð¥ï¿½ï¿½È¥ï¿½ï¿½é¥¤ï¿½ó¤µ¤ï¿½Æ¤ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½Ñ¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½ï¿½ï¿½Ë¤ï¿½Ã¤ï¿½ï¿½ï¿½ï¿½Ú¤ï¿½ï¿½Ê¤ï¿½ï¿½ï¿½ï¿½`ï¿½É¤ï¿½ï¿½ï¿½ï¿½É¤ï¿½ï¿½ï¿½ë¤¿ï¿½á¡¢Ê®ï¿½Ö¤ï¿½×¢ï¿½ï¿½Î¤ï¿½ï¿½È¡ï¿½
 static inline void __memcpy4aa(void *d, void *s, unsigned long c)
 {
 	unsigned long wk0,wk1,wk2,wk3;
@@ -120,10 +124,10 @@ static inline void __memcpy4aa(void *d, void *s, unsigned long c)
 	);
 }
 
-//longÅäÁÐ¤ò¥³¥Ô©`¡£ÅäÁÐ¾³½ç¤Ï4¥Ð¥¤¥È¥¢¥é¥¤¥ó¤µ¤ì¤Æ¤¤¤ë±ØÒª¤¢¤ê
-//s,d¤Ï²ÎÕÕ¶É¤·’Q¤¤¤Ë¤Ê¤ë¤Î¤Ç¡¢¥ê¥¿©`¥óáá¤Ï‰ä¸ü¤µ¤ì¤Æ¤¤¤ë¤È¿¼¤¨¤¿¤Û¤¦¤¬Á¼¤¤
-//¥³¥ó¥Ñ¥¤¥é¤Î×îßm»¯¤Ë¤è¤Ã¤ÆÓèÆÚ¤·¤Ê¤¤¥³©`¥É¤¬Éú³É¤µ¤ì¤ë¤¿¤á¡¢Ê®·Ö¤Ë×¢Òâ¤Î¤³¤È¡£__memcpy4¤Î¤Û¤¦¤¬°²È«¡£
-//¤È¤¤¤¤¤Þ¤¹¤«c¤Ç•ø¤¤¤Æ¤âÈ«È»‰ä¤ï¤é¤Ê¤¤¤è¤¦¤Ê¡£???????¤Î¤Ë¡£
+//longï¿½ï¿½ï¿½Ð¤ò¥³¥Ô©`ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½4ï¿½Ð¥ï¿½ï¿½È¥ï¿½ï¿½é¥¤ï¿½ó¤µ¤ï¿½Æ¤ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½ï¿½
+//s,dï¿½Ï²ï¿½ï¿½Õ¶É¤ï¿½ï¿½Qï¿½ï¿½ï¿½Ë¤Ê¤ï¿½Î¤Ç¡ï¿½ï¿½ê¥¿ï¿½`ï¿½ï¿½ï¿½ï¿½Ï‰ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¤ï¿½ï¿½ï¿½È¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Û¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ï¿½Ñ¥ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½mï¿½ï¿½ï¿½Ë¤ï¿½Ã¤ï¿½ï¿½ï¿½ï¿½Ú¤ï¿½ï¿½Ê¤ï¿½ï¿½ï¿½ï¿½`ï¿½É¤ï¿½ï¿½ï¿½ï¿½É¤ï¿½ï¿½ï¿½ë¤¿ï¿½á¡¢Ê®ï¿½Ö¤ï¿½×¢ï¿½ï¿½Î¤ï¿½ï¿½È¡ï¿½__memcpy4ï¿½Î¤Û¤ï¿½ï¿½ï¿½ï¿½ï¿½È«ï¿½ï¿½
+//ï¿½È¤ï¿½ï¿½ï¿½ï¿½Þ¤ï¿½ï¿½ï¿½cï¿½Ç•ï¿½ï¿½ï¿½ï¿½Æ¤ï¿½È«È»ï¿½ï¿½ï¿½ï¿½Ê¤ï¿½ï¿½è¤¦ï¿½Ê¡ï¿½???????ï¿½Î¤Ë¡ï¿½
 static inline void __memcpy4a(unsigned long *d, unsigned long *s, unsigned long c)
 {
 	unsigned long wk,counter;

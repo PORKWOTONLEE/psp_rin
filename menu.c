@@ -1239,6 +1239,7 @@ void rin_menu(void)
 		CPU_CLOCK,
 		COLOR_CONFIG,
 		KEY_CONFIG,
+		CODE_PAGE,
 		LOAD_CHEAT,
 		SELECT_CHEAT,
 		LOAD_ROM,
@@ -1366,6 +1367,9 @@ void rin_menu(void)
 				rin_keyconfig();
 				crs_count=0;
 				break;
+			case CODE_PAGE:
+				setting.utf8_support = !setting.utf8_support;
+				break;
 			case LOAD_CHEAT:
 				if(getFilePath(CheatPath,EXT_TCH)){
 					strcpy(msg, "金手指文件加载失败");
@@ -1486,10 +1490,7 @@ void rin_menu(void)
 
 		mn_printf(x,y,setting.color[3],"即时存档");
 		mn_printf(x,y+12,setting.color[3],"即时读档");
-		if (setting.quickslot > STATE_SLOT_MAX)
-			mn_printf(x,y+24,setting.color[3],"快速存档：临时插槽");
-		else
-			mn_printf(x,y+24,setting.color[3],"快速存档：普通插槽 %d",setting.quickslot);
+		mn_printf(x,y+24,setting.color[3],(setting.quickslot > STATE_SLOT_MAX)?"快速存档：临时插槽":"快速存档：普通插槽 %d",setting.quickslot);
 		mn_printf(x,y+36,setting.color[3],"存档缩略图：%s",setting.thumb?"开启":"关闭");
 		mn_printf(x,y+48,setting.color[3],"压缩存档：%s",setting.compress?"开启":"关闭");
 
@@ -1505,15 +1506,16 @@ void rin_menu(void)
 		mn_printf(x,y+180,setting.color[3],"CPU频率：%s",cpu_clocks[setting.cpu_clock]);
 
 		mn_printf(x+250,y,setting.color[3],"菜单颜色设置");
-		mn_printf(x+250,y+12,setting.color[3],"按键设置");
+        mn_printf(x+250,y+12,setting.color[3],"按键设置");
+		mn_printf(x+250,y+24,setting.color[3],"文件系统编码：%s",setting.utf8_support?"UTF-8":"GBK");
 
-		mn_printf(x+250,y+36,setting.color[3],"加载金手指文件");
-		mn_printf(x+250,y+48,setting.color[nCheats>0?3:2],"选择作弊码");
+		mn_printf(x+250,y+48,setting.color[3],"加载金手指文件");
+		mn_printf(x+250,y+60,setting.color[nCheats>0?3:2],"选择作弊码");
 		
-		mn_printf(x+250,y+72,setting.color[3],"返回ROM列表");
-		mn_printf(x+250,y+84,setting.color[3],"重置");
-		mn_printf(x+250,y+96,setting.color[3],"继续");
-		mn_printf(x+250,y+108,setting.color[3],"贡献列表");
+		mn_printf(x+250,y+84,setting.color[3],"返回ROM列表");
+		mn_printf(x+250,y+96,setting.color[3],"重置");
+		mn_printf(x+250,y+108,setting.color[3],"继续");
+		mn_printf(x+250,y+120,setting.color[3],"贡献列表");
 		
 		if(crs_count < 15){
 			if (sel>=COLOR_CONFIG) {

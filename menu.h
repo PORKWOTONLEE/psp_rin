@@ -36,6 +36,7 @@ typedef struct
 	u8 sound;
 	u8 sound_buffer;
 	u8 cpu_clock;
+	u8 utf8_support;
 	S_BUTTON skeys[32]; //”‡∑÷§À¥_±£
 	u8 analog2dpad;
 	unsigned long color[4];

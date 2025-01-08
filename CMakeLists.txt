@@ -15,6 +15,7 @@ add_executable(${PROJECT_NAME} main.c saveload.c filer.c rewind.c pg.c gz.c
 target_link_libraries(${PROJECT_NAME} PRIVATE
     ${CMAKE_SOURCE_DIR}/lib/libpng.a
     ${CMAKE_SOURCE_DIR}/lib/unziplib.a
+    ${CMAKE_SOURCE_DIR}/lib/libiconv.a
     z
     pspge
     pspctrl

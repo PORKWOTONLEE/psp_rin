@@ -536,7 +536,7 @@ int getFilePath(char *fullpath, u32 ext)
 		x=28; y=32;
 		for(i=0; i<rows; i++){
 			if(top+i >= nfiles) break;
-			mn_printf(x, y, setting.color[top+i==sel?2:3], sortfiles[top+i]->d_name);
+			fs_printf(x, y, setting.color[top+i==sel?2:3], sortfiles[top+i]->d_name);
 			y+=12;
 		}
 		
